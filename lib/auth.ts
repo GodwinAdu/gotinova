@@ -18,15 +18,13 @@ export const auth = betterAuth({
   baseURLPath: '/api/auth',
   trustedOrigins: [
     getBaseURL(),
-    'http://localhost:3000',
-    'http://localhost:3001',
     ...(process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
       : []),
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
     ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
   ].filter(Boolean),
-  secret: process.env.BETTER_AUTH_SECRET || process.env.NEON_AUTH_COOKIE_SECRET,
+  secret: process.env.NEON_AUTH_COOKIE_SECRET,
   emailAndPassword: {
     enabled: true,
   },
