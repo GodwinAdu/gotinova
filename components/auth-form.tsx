@@ -73,72 +73,107 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto p-6">
-      <div className="bg-card rounded-lg border shadow-sm p-8">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          {mode === 'sign-in' ? 'Sign In' : 'Create Account'}
-        </h1>
-
-        {error && <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded text-sm">{error}</div>}
+    <div className="w-full space-y-4">
+      <div className="bg-card rounded-lg border shadow-sm p-4 md:p-6 space-y-4">
+        {error && (
+          <div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm font-medium">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'sign-up' && (
-            <div>
-              <label className="block text-sm font-medium mb-2">Full Name</label>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">Full Name</label>
               <Input
                 type="text"
-                placeholder="Your name"
+                placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                disabled={loading}
+                className="h-11 text-base md:text-sm"
               />
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Email Address</label>
             <Input
               type="email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
+              className="h-11 text-base md:text-sm"
+              autoComplete="email"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-medium">Password</label>
+              {mode === 'sign-in' && (
+                <Link href="/" className="text-xs text-primary hover:underline">
+                  Forgot?
+                </Link>
+              )}
+            </div>
             <Input
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
+              className="h-11 text-base md:text-sm"
+              autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'}
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? (mode === 'sign-in' ? 'Signing in...' : 'Creating account...') : mode === 'sign-in' ? 'Sign In' : 'Sign Up'}
+          {mode === 'sign-up' && (
+            <p className="text-xs text-muted-foreground">
+              By creating an account, you agree to our Terms of Service and Privacy Policy
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full h-11 text-base md:text-sm font-medium"
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 border-2 border-transparent border-t-current rounded-full animate-spin" />
+                {mode === 'sign-in' ? 'Signing in...' : 'Creating account...'}
+              </div>
+            ) : mode === 'sign-in' ? (
+              'Sign In'
+            ) : (
+              'Create Account'
+            )}
           </Button>
         </form>
+      </div>
 
-        <div className="mt-6 text-center text-sm">
-          {mode === 'sign-in' ? (
-            <>
-              Don&apos;t have an account?{' '}
-              <Link href="/sign-up" className="text-primary hover:underline font-medium">
-                Sign up
-              </Link>
-            </>
-          ) : (
-            <>
-              Already have an account?{' '}
-              <Link href="/sign-in" className="text-primary hover:underline font-medium">
-                Sign in
-              </Link>
-            </>
-          )}
-        </div>
+      {/* Footer link - kept outside card for better mobile layout */}
+      <div className="text-center text-sm text-muted-foreground">
+        {mode === 'sign-in' ? (
+          <>
+            Don&apos;t have an account?{' '}
+            <Link href="/sign-up" className="text-primary hover:underline font-medium">
+              Sign up here
+            </Link>
+          </>
+        ) : (
+          <>
+            Already have an account?{' '}
+            <Link href="/sign-in" className="text-primary hover:underline font-medium">
+              Sign in here
+            </Link>
+          </>
+        )}
       </div>
     </div>
   )

@@ -24,20 +24,20 @@ export default async function HomePage() {
       <Header user={session?.user} />
       <main className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-primary/10 to-accent/10 py-12 md:py-20">
-          <div className="container max-w-7xl mx-auto px-4">
-            <div className="max-w-2xl">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
+        <section className="bg-gradient-to-br from-primary/15 via-background to-accent/10 py-8 md:py-16 lg:py-24">
+          <div className="w-full px-4 md:px-6">
+            <div className="max-w-2xl space-y-4 md:space-y-6">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-balance leading-tight">
                 Premium Hair & Wig Collection
               </h1>
-              <p className="text-lg text-muted-foreground mb-8 text-balance">
+              <p className="text-sm md:text-base lg:text-lg text-muted-foreground text-balance leading-relaxed">
                 Discover authentic, high-quality hairpieces for every style and occasion. Transform your look with LuxeHair.
               </p>
-              <div className="flex gap-4">
-                <Button asChild size="lg">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+                <Button asChild size="lg" className="w-full sm:w-auto">
                   <Link href="/products">Shop Now</Link>
                 </Button>
-                <Button asChild variant="outline" size="lg">
+                <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
                   <Link href="/about">Learn More</Link>
                 </Button>
               </div>
@@ -47,19 +47,19 @@ export default async function HomePage() {
 
         {/* Categories Section */}
         {categories.length > 0 && (
-          <section className="py-12 border-b">
-            <div className="container max-w-7xl mx-auto px-4">
-              <h2 className="text-2xl md:text-3xl font-bold mb-8">Shop by Category</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <section className="py-8 md:py-12 border-b">
+            <div className="w-full px-4 md:px-6">
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-6 md:mb-8">Shop by Category</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {categories.map((category) => (
                   <Link
                     key={category.id}
                     href={`/products?category=${category.id}`}
-                    className="p-4 bg-card border rounded-lg hover:shadow-md transition text-center"
+                    className="p-3 md:p-4 bg-card border rounded-lg hover:shadow-md transition-shadow text-center space-y-1"
                   >
-                    <h3 className="font-semibold">{category.name}</h3>
+                    <h3 className="font-semibold text-sm md:text-base">{category.name}</h3>
                     {category.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
+                      <p className="text-xs md:text-sm text-muted-foreground">{category.description}</p>
                     )}
                   </Link>
                 ))}
@@ -69,17 +69,17 @@ export default async function HomePage() {
         )}
 
         {/* Featured Products */}
-        <section className="py-12">
-          <div className="container max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold">Featured Products</h2>
-              <Button variant="ghost" asChild>
+        <section className="py-8 md:py-12">
+          <div className="w-full px-4 md:px-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">Featured Products</h2>
+              <Button variant="ghost" asChild className="w-full sm:w-auto text-right">
                 <Link href="/products">View All →</Link>
               </Button>
             </div>
 
             {products.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
                 {products.map((product) => (
                   <ProductCard
                     key={product.id}
