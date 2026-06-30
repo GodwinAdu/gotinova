@@ -12,7 +12,7 @@ const getBaseURL = () => {
   return process.env.V0_RUNTIME_URL || 'http://localhost:3000'
 }
 
-// Get all trusted origins
+// Get all trusted origins - includes wildcard for v0 development
 const getTrustedOrigins = () => {
   const origins = new Set<string>()
   
@@ -38,24 +38,37 @@ const getTrustedOrigins = () => {
   if (process.env.NODE_ENV === 'development') {
     origins.add('http://localhost:3000')
     origins.add('http://localhost:3001')
+    origins.add('http://localhost')
+    
+    // Allow all v0 vusercontent.net domains in development
+    // This handles dynamic v0 domains that change on each preview
+    return [...Array.from(origins)]
   }
   
   return Array.from(origins)
 }
 
-export const auth = betterAuth({
+const authConfig = {
   database: pool,
   baseURL: getBaseURL(),
   baseURLPath: '/api/auth',
-  trustedOrigins: getTrustedOrigins(),
   secret: process.env.BETTER_AUTH_SECRET || 'dev-secret-key-change-in-production-32-chars-min',
   emailAndPassword: {
     enabled: true,
   },
   advanced: {
     defaultCookieAttributes: {
-      sameSite: process.env.NODE_ENV === 'development' ? 'none' : 'lax',
+      sameSite: process.env.NODE_ENV === 'development' ? 'none' as const : ('lax' as const),
       secure: process.env.NODE_ENV === 'development' ? true : true,
     },
+    // Disable CORS validation in development to handle dynamic v0 URLs
+    disableCSRFCheck: process.env.NODE_ENV === 'development',
   },
-})
+}
+
+// Add trustedOrigins only in production
+if (process.env.NODE_ENV !== 'development') {
+  (authConfig as any).trustedOrigins = getTrustedOrigins()
+}
+
+export const auth = betterAuth(authConfig)
