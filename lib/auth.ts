@@ -12,19 +12,43 @@ const getBaseURL = () => {
   return process.env.V0_RUNTIME_URL || 'http://localhost:3000'
 }
 
+// Get all trusted origins
+const getTrustedOrigins = () => {
+  const origins = new Set<string>()
+  
+  // Add base URL
+  origins.add(getBaseURL())
+  
+  // Add v0 runtime URL if available
+  if (process.env.V0_RUNTIME_URL) {
+    origins.add(process.env.V0_RUNTIME_URL)
+  }
+  
+  // Add Vercel URLs
+  if (process.env.VERCEL_URL) {
+    origins.add(`https://${process.env.VERCEL_URL}`)
+    origins.add(`http://${process.env.VERCEL_URL}`)
+  }
+  
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    origins.add(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`)
+  }
+  
+  // Add localhost for development
+  if (process.env.NODE_ENV === 'development') {
+    origins.add('http://localhost:3000')
+    origins.add('http://localhost:3001')
+  }
+  
+  return Array.from(origins)
+}
+
 export const auth = betterAuth({
   database: pool,
   baseURL: getBaseURL(),
   baseURLPath: '/api/auth',
-  trustedOrigins: [
-    getBaseURL(),
-    ...(process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
-      : []),
-    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
-    ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
-  ].filter(Boolean),
-  secret: process.env.NEON_AUTH_COOKIE_SECRET,
+  trustedOrigins: getTrustedOrigins(),
+  secret: process.env.BETTER_AUTH_SECRET || 'dev-secret-key-change-in-production-32-chars-min',
   emailAndPassword: {
     enabled: true,
   },
