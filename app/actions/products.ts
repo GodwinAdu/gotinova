@@ -60,7 +60,7 @@ export async function getProductById(id: string) {
   try {
     const result = await db.select().from(products).where(eq(products.id, id))
     if (result.length === 0) {
-      return { success: false, error: 'Product not found' }
+      throw new Error('Product not found')
     }
 
     const attrs = await db
@@ -68,9 +68,67 @@ export async function getProductById(id: string) {
       .from(productAttributes)
       .where(eq(productAttributes.productId, id))
 
-    return { success: true, data: { ...result[0], attributes: attrs } }
+    return { ...result[0], attributes: attrs }
   } catch (error) {
     console.error('Error fetching product:', error)
-    return { success: false, error: 'Failed to fetch product' }
+    throw error
+  }
+}
+
+export async function getReviewsForProduct(productId: string) {
+  try {
+    // Mock reviews - in real app would fetch from database
+    return [
+      {
+        id: '1',
+        rating: 5,
+        title: 'Excellent Quality',
+        comment: 'Best hair I have purchased. Very thick and long lasting.',
+        userName: 'Amina K.',
+        createdAt: new Date().toISOString(),
+        images: undefined,
+      },
+    ]
+  } catch (error) {
+    console.error('Error fetching reviews:', error)
+    return []
+  }
+}
+
+export async function getFrequentlyBoughtTogether(productId: string) {
+  try {
+    // Mock related products - in real app would fetch from database
+    const relatedResult = await db
+      .select({ relatedProductId: products.id })
+      .from(products)
+      .where(and(eq(products.isActive, true), 
+        lte(products.id, productId)))
+      .limit(4)
+    
+    if (relatedResult.length === 0) {
+      return []
+    }
+
+    const relatedIds = relatedResult.map(r => r.relatedProductId)
+    const related = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.isActive, true)))
+      .limit(4)
+
+    return related
+  } catch (error) {
+    console.error('Error fetching related products:', error)
+    return []
+  }
+}
+
+export async function getAllProducts() {
+  try {
+    const result = await db.select().from(products)
+    return result
+  } catch (error) {
+    console.error('Error fetching all products:', error)
+    return []
   }
 }
