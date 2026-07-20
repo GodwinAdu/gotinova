@@ -655,7 +655,6 @@ export async function processRefund(orderId: string, data: {
             <p>Thank you,<br>GotiNova Team</p>
           </div>`,
         }).catch(() => {})
-        }
       }
     } catch {}
 
