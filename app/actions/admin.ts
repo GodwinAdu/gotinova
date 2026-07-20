@@ -632,10 +632,8 @@ export async function processRefund(orderId: string, data: {
 
     // Send refund email notification
     try {
-      const { sendEmail } = await import('@/lib/email')
       const shippingInfo = order[0].shippingAddress ? JSON.parse(order[0].shippingAddress) : {}
-      if (shippingInfo.email) {
-        // Dynamic import to avoid issues
+      if (shippingInfo.email && process.env.SMTP_HOST && process.env.SMTP_USER) {
         const nodemailer = await import('nodemailer')
         const transporter = nodemailer.default.createTransport({
           host: process.env.SMTP_HOST,
@@ -644,20 +642,19 @@ export async function processRefund(orderId: string, data: {
           auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
         })
 
-        if (process.env.SMTP_HOST && process.env.SMTP_USER) {
-          await transporter.sendMail({
-            from: process.env.SMTP_FROM || `LuxeHair <${process.env.SMTP_USER}>`,
-            to: shippingInfo.email,
-            subject: `Refund Processed — ${order[0].orderNumber}`,
-            html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px;">
-              <h2>Refund Processed</h2>
-              <p>Hi ${shippingInfo.name || 'Customer'},</p>
-              <p>A refund of <strong>GH₵ ${refundAmount.toFixed(2)}</strong> has been processed for your order <strong>${order[0].orderNumber}</strong>.</p>
-              <p>Reason: ${data.reason}</p>
-              <p>The refund should appear in your account within 3-5 business days.</p>
-              <p>Thank you,<br>LuxeHair Team</p>
-            </div>`,
-          }).catch(() => {})
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM || `GotiNova <${process.env.SMTP_USER}>`,
+          to: shippingInfo.email,
+          subject: `Refund Processed — ${order[0].orderNumber}`,
+          html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+            <h2>Refund Processed</h2>
+            <p>Hi ${shippingInfo.name || 'Customer'},</p>
+            <p>A refund of <strong>GH₵ ${refundAmount.toFixed(2)}</strong> has been processed for your order <strong>${order[0].orderNumber}</strong>.</p>
+            <p>Reason: ${data.reason}</p>
+            <p>The refund should appear in your account within 3-5 business days.</p>
+            <p>Thank you,<br>GotiNova Team</p>
+          </div>`,
+        }).catch(() => {})
         }
       }
     } catch {}
