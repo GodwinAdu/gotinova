@@ -10,13 +10,18 @@ import { v4 as uuid } from 'uuid'
 
 async function getUserId() {
   const session = await auth.api.getSession({ headers: await headers() })
-  // Allow guests with a temporary session ID
-  return session?.user?.id || 'guest'
+  if (!session?.user?.id) {
+    return null
+  }
+  return session.user.id
 }
 
 export async function addToCart(productId: string, quantity: number = 1) {
   try {
     const userId = await getUserId()
+    if (!userId) {
+      return { success: false, error: 'Please sign in to add items to cart' }
+    }
 
     // Check if product exists and has stock
     const product = await db.select().from(products).where(eq(products.id, productId))
@@ -61,14 +66,16 @@ export async function addToCart(productId: string, quantity: number = 1) {
 export async function updateCartItem(cartItemId: string, quantity: number) {
   try {
     const userId = await getUserId()
+    if (!userId) {
+      return { success: false, error: 'Please sign in' }
+    }
 
     const item = await db.select().from(cartItems).where(eq(cartItems.id, cartItemId))
     if (!item.length) {
       return { success: false, error: 'Item not found' }
     }
     
-    // Allow access if user owns the item or is the guest who added it
-    if (item[0].userId !== userId && userId !== 'guest') {
+    if (item[0].userId !== userId) {
       return { success: false, error: 'Unauthorized' }
     }
 
@@ -89,14 +96,16 @@ export async function updateCartItem(cartItemId: string, quantity: number) {
 export async function removeFromCart(cartItemId: string) {
   try {
     const userId = await getUserId()
+    if (!userId) {
+      return { success: false, error: 'Please sign in' }
+    }
 
     const item = await db.select().from(cartItems).where(eq(cartItems.id, cartItemId))
     if (!item.length) {
       return { success: false, error: 'Item not found' }
     }
     
-    // Allow access if user owns the item or is the guest who added it
-    if (item[0].userId !== userId && userId !== 'guest') {
+    if (item[0].userId !== userId) {
       return { success: false, error: 'Unauthorized' }
     }
 
@@ -113,6 +122,9 @@ export async function removeFromCart(cartItemId: string) {
 export async function getCart() {
   try {
     const userId = await getUserId()
+    if (!userId) {
+      return { success: true, data: [] }
+    }
 
     const items = await db
       .select({
@@ -129,5 +141,54 @@ export async function getCart() {
   } catch (error) {
     console.error('Error fetching cart:', error)
     return { success: false, error: 'Failed to fetch cart' }
+  }
+}
+
+export async function getCartItems() {
+  try {
+    const userId = await getUserId()
+    if (!userId) {
+      return []
+    }
+
+    const items = await db
+      .select({
+        id: cartItems.id,
+        productId: cartItems.productId,
+        quantity: cartItems.quantity,
+        product: products,
+      })
+      .from(cartItems)
+      .innerJoin(products, eq(cartItems.productId, products.id))
+      .where(eq(cartItems.userId, userId))
+
+    return items.map(item => ({
+      id: item.id,
+      product: {
+        id: item.product.id,
+        name: item.product.name,
+        image: item.product.image || '/placeholder.jpg',
+        price: parseFloat(item.product.price),
+      },
+      quantity: item.quantity,
+    }))
+  } catch (error) {
+    console.error('Error fetching cart items:', error)
+    return []
+  }
+}
+
+export async function clearCart() {
+  try {
+    const userId = await getUserId()
+    if (!userId) {
+      return { success: false, error: 'Please sign in' }
+    }
+    await db.delete(cartItems).where(eq(cartItems.userId, userId))
+    revalidatePath('/cart')
+    return { success: true }
+  } catch (error) {
+    console.error('Error clearing cart:', error)
+    return { success: false, error: 'Failed to clear cart' }
   }
 }

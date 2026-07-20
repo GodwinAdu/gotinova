@@ -130,8 +130,8 @@ export function calculateTax(amount: number, taxRate: number = 0.17): number {
  */
 export function calculateTotal(
   subtotal: number,
-  shippingCost: number = 500,
-  taxRate: number = 0.17
+  shippingCost: number = 50,
+  taxRate: number = 0.125
 ): number {
   const tax = calculateTax(subtotal, taxRate)
   return subtotal + shippingCost + tax

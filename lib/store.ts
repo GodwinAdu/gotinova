@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-// Cart Store
-interface CartItem {
+// Cart Store — works for both guests and logged-in users (localStorage)
+export interface CartItem {
   id: string
   productId: string
   name: string
@@ -13,9 +13,9 @@ interface CartItem {
 
 interface CartStore {
   items: CartItem[]
-  addItem: (item: CartItem) => void
-  removeItem: (id: string) => void
-  updateQuantity: (id: string, quantity: number) => void
+  addItem: (item: Omit<CartItem, 'id'>) => void
+  removeItem: (productId: string) => void
+  updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
   getTotal: () => number
   getItemCount: () => number
@@ -37,18 +37,23 @@ export const useCartStore = create<CartStore>()(
               ),
             }
           }
-          return { items: [...state.items, item] }
+          return { items: [...state.items, { ...item, id: `local-${Date.now()}-${Math.random().toString(36).slice(2)}` }] }
         }),
-      removeItem: (id) =>
+      removeItem: (productId) =>
         set((state) => ({
-          items: state.items.filter((i) => i.id !== id),
+          items: state.items.filter((i) => i.productId !== productId),
         })),
-      updateQuantity: (id, quantity) =>
-        set((state) => ({
-          items: state.items.map((i) =>
-            i.id === id ? { ...i, quantity } : i
-          ),
-        })),
+      updateQuantity: (productId, quantity) =>
+        set((state) => {
+          if (quantity <= 0) {
+            return { items: state.items.filter((i) => i.productId !== productId) }
+          }
+          return {
+            items: state.items.map((i) =>
+              i.productId === productId ? { ...i, quantity } : i
+            ),
+          }
+        }),
       clearCart: () => set({ items: [] }),
       getTotal: () => {
         const state = get()
@@ -60,7 +65,7 @@ export const useCartStore = create<CartStore>()(
       },
     }),
     {
-      name: 'cart-store',
+      name: 'luxehair-cart',
     }
   )
 )
@@ -77,7 +82,7 @@ interface WishlistItem {
 interface WishlistStore {
   items: WishlistItem[]
   addItem: (item: WishlistItem) => void
-  removeItem: (id: string) => void
+  removeItem: (productId: string) => void
   isInWishlist: (productId: string) => boolean
   clearWishlist: () => void
 }
@@ -92,9 +97,9 @@ export const useWishlistStore = create<WishlistStore>()(
           if (exists) return state
           return { items: [...state.items, item] }
         }),
-      removeItem: (id) =>
+      removeItem: (productId) =>
         set((state) => ({
-          items: state.items.filter((i) => i.id !== id),
+          items: state.items.filter((i) => i.productId !== productId),
         })),
       isInWishlist: (productId) => {
         const state = get()
@@ -103,7 +108,7 @@ export const useWishlistStore = create<WishlistStore>()(
       clearWishlist: () => set({ items: [] }),
     }),
     {
-      name: 'wishlist-store',
+      name: 'luxehair-wishlist',
     }
   )
 )
@@ -113,100 +118,10 @@ interface UIStore {
   isSidebarOpen: boolean
   toggleSidebar: () => void
   closeSidebar: () => void
-  openSidebar: () => void
-  isDarkMode: boolean
-  toggleDarkMode: () => void
-  isSearchOpen: boolean
-  toggleSearch: () => void
 }
 
-export const useUIStore = create<UIStore>()(
-  persist(
-    (set) => ({
-      isSidebarOpen: false,
-      toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
-      closeSidebar: () => set({ isSidebarOpen: false }),
-      openSidebar: () => set({ isSidebarOpen: true }),
-      isDarkMode: false,
-      toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
-      isSearchOpen: false,
-      toggleSearch: () => set((state) => ({ isSearchOpen: !state.isSearchOpen })),
-    }),
-    {
-      name: 'ui-store',
-    }
-  )
-)
-
-// User Store
-interface UserPreferences {
-  currency: string
-  language: string
-  notifications: boolean
-  theme: 'light' | 'dark' | 'system'
-}
-
-interface UserStore {
-  preferences: UserPreferences
-  setPreference: (key: keyof UserPreferences, value: any) => void
-  resetPreferences: () => void
-}
-
-const defaultPreferences: UserPreferences = {
-  currency: 'PKR',
-  language: 'en',
-  notifications: true,
-  theme: 'system',
-}
-
-export const useUserStore = create<UserStore>()(
-  persist(
-    (set) => ({
-      preferences: defaultPreferences,
-      setPreference: (key, value) =>
-        set((state) => ({
-          preferences: { ...state.preferences, [key]: value },
-        })),
-      resetPreferences: () => set({ preferences: defaultPreferences }),
-    }),
-    {
-      name: 'user-store',
-    }
-  )
-)
-
-// Filter Store
-interface FilterState {
-  category: string[]
-  priceRange: [number, number]
-  sortBy: string
-  searchQuery: string
-  ratingFilter: number
-  setCategory: (categories: string[]) => void
-  setPriceRange: (range: [number, number]) => void
-  setSortBy: (sort: string) => void
-  setSearchQuery: (query: string) => void
-  setRatingFilter: (rating: number) => void
-  resetFilters: () => void
-}
-
-export const useFilterStore = create<FilterState>((set) => ({
-  category: [],
-  priceRange: [0, 100000],
-  sortBy: 'newest',
-  searchQuery: '',
-  ratingFilter: 0,
-  setCategory: (categories) => set({ category: categories }),
-  setPriceRange: (range) => set({ priceRange: range }),
-  setSortBy: (sort) => set({ sortBy: sort }),
-  setSearchQuery: (query) => set({ searchQuery: query }),
-  setRatingFilter: (rating) => set({ ratingFilter: rating }),
-  resetFilters: () =>
-    set({
-      category: [],
-      priceRange: [0, 100000],
-      sortBy: 'newest',
-      searchQuery: '',
-      ratingFilter: 0,
-    }),
+export const useUIStore = create<UIStore>()((set) => ({
+  isSidebarOpen: false,
+  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+  closeSidebar: () => set({ isSidebarOpen: false }),
 }))

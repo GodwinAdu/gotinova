@@ -87,3 +87,51 @@ export async function getWishlist() {
     return { success: false, error: 'Failed to fetch wishlist' }
   }
 }
+
+export async function isInWishlist(productId: string): Promise<boolean> {
+  try {
+    const userId = await getUserId()
+
+    const existing = await db
+      .select()
+      .from(wishlistItems)
+      .where(and(eq(wishlistItems.userId, userId), eq(wishlistItems.productId, productId)))
+
+    return existing.length > 0
+  } catch (error) {
+    console.error('Error checking wishlist:', error)
+    return false
+  }
+}
+
+export async function toggleWishlist(productId: string) {
+  try {
+    const userId = await getUserId()
+
+    const existing = await db
+      .select()
+      .from(wishlistItems)
+      .where(and(eq(wishlistItems.userId, userId), eq(wishlistItems.productId, productId)))
+
+    if (existing.length > 0) {
+      // Remove from wishlist
+      await db
+        .delete(wishlistItems)
+        .where(and(eq(wishlistItems.userId, userId), eq(wishlistItems.productId, productId)))
+      revalidatePath('/wishlist')
+      return { success: true, action: 'removed', message: 'Removed from wishlist' }
+    } else {
+      // Add to wishlist
+      await db.insert(wishlistItems).values({
+        id: uuid(),
+        userId,
+        productId,
+      })
+      revalidatePath('/wishlist')
+      return { success: true, action: 'added', message: 'Added to wishlist' }
+    }
+  } catch (error) {
+    console.error('Error toggling wishlist:', error)
+    return { success: false, error: 'Failed to toggle wishlist' }
+  }
+}

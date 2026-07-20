@@ -68,7 +68,20 @@ export async function getProductById(id: string) {
       .from(productAttributes)
       .where(eq(productAttributes.productId, id))
 
-    return { ...result[0], attributes: attrs }
+    // Fetch category info
+    const category = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.id, result[0].categoryId))
+
+    return {
+      ...result[0],
+      price: parseFloat(result[0].price),
+      originalPrice: result[0].originalPrice ? parseFloat(result[0].originalPrice) : undefined,
+      rating: parseFloat(result[0].rating || '0'),
+      attributes: attrs,
+      category: category[0] || { name: 'Uncategorized' },
+    }
   } catch (error) {
     console.error('Error fetching product:', error)
     throw error
@@ -129,6 +142,64 @@ export async function getAllProducts() {
     return result
   } catch (error) {
     console.error('Error fetching all products:', error)
+    return []
+  }
+}
+
+
+export async function getRecommendations(productId: string, limit = 4) {
+  try {
+    const { orderItems } = await import('@/lib/db/schema')
+    const { sql } = await import('drizzle-orm')
+
+    // Find products that were ordered together with this product
+    // Logic: find orders that contain this product, then get other products from those orders
+    const result = await db.execute(sql`
+      SELECT oi2."productId", oi2."productName", 
+             COUNT(*) as frequency,
+             p."price", p."image", p."rating", p."reviewCount"
+      FROM "orderItems" oi1
+      JOIN "orderItems" oi2 ON oi1."orderId" = oi2."orderId" AND oi1."productId" != oi2."productId"
+      LEFT JOIN "products" p ON p."id" = oi2."productId"
+      WHERE oi1."productId" = ${productId}
+        AND oi2."productId" IS NOT NULL
+        AND p."isActive" = true
+      GROUP BY oi2."productId", oi2."productName", p."price", p."image", p."rating", p."reviewCount"
+      ORDER BY frequency DESC
+      LIMIT ${limit}
+    `)
+
+    // If no order-based recommendations, fall back to same-category products
+    if (!result.rows || result.rows.length === 0) {
+      const currentProduct = await db.select().from(products).where(eq(products.id, productId))
+      if (currentProduct.length === 0) return []
+
+      const sameCategoryProducts = await db
+        .select()
+        .from(products)
+        .where(
+          and(
+            eq(products.categoryId, currentProduct[0].categoryId),
+            eq(products.isActive, true)
+          )
+        )
+        .limit(limit + 1)
+
+      return sameCategoryProducts
+        .filter(p => p.id !== productId)
+        .slice(0, limit)
+    }
+
+    return result.rows.map((row: any) => ({
+      id: row.productId,
+      name: row.productName,
+      price: row.price || '0',
+      image: row.image,
+      rating: row.rating || '0',
+      reviewCount: row.reviewCount || 0,
+    }))
+  } catch (error) {
+    console.error('Error fetching recommendations:', error)
     return []
   }
 }

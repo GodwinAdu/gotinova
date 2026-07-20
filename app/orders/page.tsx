@@ -12,8 +12,8 @@ interface Order {
   id: string
   orderNumber: string
   totalAmount: string
-  status: string
-  paymentStatus: string
+  status: string | null
+  paymentStatus: string | null
   createdAt: Date
 }
 
@@ -29,8 +29,8 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     try {
       const result = await getOrders()
-      if (result.success) {
-        setOrders(result.data)
+      if (result.success && result.data) {
+        setOrders(result.data as Order[])
       }
     } catch (error) {
       console.error('Error loading orders:', error)
@@ -110,14 +110,14 @@ export default function OrdersPage() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex gap-4">
-                      <Badge variant={getStatusBadge(order.status)}>
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      <Badge variant={getStatusBadge(order.status || 'pending')}>
+                        {(order.status || 'pending').charAt(0).toUpperCase() + (order.status || 'pending').slice(1)}
                       </Badge>
-                      <Badge variant={getPaymentBadge(order.paymentStatus)}>
-                        Payment: {order.paymentStatus}
+                      <Badge variant={getPaymentBadge(order.paymentStatus || 'pending')}>
+                        Payment: {order.paymentStatus || 'pending'}
                       </Badge>
                     </div>
-                    <p className="font-semibold">${parseFloat(order.totalAmount).toFixed(2)}</p>
+                    <p className="font-semibold">GH₵ {parseFloat(order.totalAmount).toFixed(0)}</p>
                   </div>
                 </Link>
               ))}

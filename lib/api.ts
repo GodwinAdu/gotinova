@@ -50,9 +50,9 @@ export async function apiRequest<T = any>(
   } = options
 
   try {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...customHeaders,
+      ...(customHeaders as Record<string, string>),
     }
 
     // Add auth token if required
@@ -164,7 +164,7 @@ export async function uploadFile(
       })
     }
 
-    const headers: HeadersInit = {}
+    const headers: Record<string, string> = {}
 
     // Add auth token if needed
     if (typeof window !== 'undefined') {

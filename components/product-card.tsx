@@ -3,18 +3,22 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Heart, ShoppingCart, Star } from 'lucide-react'
+import { Heart, ShoppingCart, Star, Check, Eye } from 'lucide-react'
 import { useState } from 'react'
-import { addToCart } from '@/app/actions/cart'
+import { useCartStore } from '@/lib/store'
+import { formatPrice } from '@/lib/utils/format'
+import { ProductQuickView } from './product-quick-view'
 
 interface ProductCardProps {
   id: string
   name: string
   price: string | number
-  originalPrice?: string | number
-  image?: string
-  rating: string | number
-  reviewCount: number
+  originalPrice?: string | number | null
+  image?: string | null
+  rating: string | number | null
+  reviewCount: number | null
+  description?: string | null
+  stock?: number
 }
 
 export function ProductCard({
@@ -25,142 +29,140 @@ export function ProductCard({
   image,
   rating,
   reviewCount,
+  description,
+  stock,
 }: ProductCardProps) {
-  const [isAdding, setIsAdding] = useState(false)
-  const [isWishlisting, setIsWishlisting] = useState(false)
-  const [message, setMessage] = useState('')
+  const [added, setAdded] = useState(false)
+  const addItem = useCartStore((s) => s.addItem)
 
   const numPrice = typeof price === 'string' ? parseFloat(price) : price
   const numOriginalPrice = originalPrice ? (typeof originalPrice === 'string' ? parseFloat(originalPrice) : originalPrice) : null
   const discount = numOriginalPrice ? Math.round((1 - numPrice / numOriginalPrice) * 100) : null
+  const numRating = Number(rating || 0)
 
-  const handleAddToCart = async () => {
-    setIsAdding(true)
-    setMessage('')
-    try {
-      const result = await addToCart(id, 1)
-      if (result.success) {
-        setMessage('Added to cart!')
-        setTimeout(() => setMessage(''), 2000)
-      } else {
-        setMessage(result.error || 'Failed to add to cart')
-      }
-    } catch (error) {
-      setMessage('Error adding to cart')
-    } finally {
-      setIsAdding(false)
-    }
-  }
-
-  const handleWishlist = async () => {
-    setIsWishlisting(true)
-    // TODO: Implement wishlist functionality
-    setIsWishlisting(false)
+  const handleAddToCart = () => {
+    addItem({
+      productId: id,
+      name,
+      price: numPrice,
+      image: image || '/placeholder.jpg',
+      quantity: 1,
+    })
+    setAdded(true)
+    setTimeout(() => setAdded(false), 2000)
   }
 
   return (
-    <div className="group relative bg-card rounded-lg md:rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
-      {/* Image Container */}
-      <div className="relative bg-muted overflow-hidden aspect-square">
+    <div className="group relative bg-card rounded-2xl border border-border/60 overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300">
+      {/* Image */}
+      <Link href={`/products/${id}`} className="block relative bg-muted/30 overflow-hidden aspect-[3/4]">
         {image ? (
           <Image
             src={image}
             alt={name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground text-sm md:text-base">
+          <div className="w-full h-full flex items-center justify-center bg-muted/50 text-muted-foreground text-xs">
             No image
           </div>
         )}
 
-        {/* Discount Badge */}
-        {discount && (
-          <div className="absolute top-2 md:top-3 right-2 md:right-3 bg-destructive text-destructive-foreground px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-bold shadow-sm">
+        {/* Discount badge */}
+        {discount && discount > 0 && (
+          <div className="absolute top-2.5 left-2.5 bg-destructive text-white px-2 py-0.5 rounded-full text-[11px] font-semibold shadow-sm">
             -{discount}%
           </div>
         )}
 
-        {/* Wishlist Button */}
-        <button
-          onClick={handleWishlist}
-          disabled={isWishlisting}
-          className="absolute top-2 md:top-3 left-2 md:left-3 p-2 md:p-2.5 bg-white/95 hover:bg-white rounded-full transition-colors shadow-sm opacity-0 group-hover:opacity-100 md:opacity-100 duration-200"
-          title="Add to wishlist"
-        >
-          <Heart className="w-4 h-4 md:w-5 md:h-5" />
-        </button>
-      </div>
+        {/* Action buttons on hover */}
+        <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+          {/* Quick View */}
+          <ProductQuickView
+            product={{ id, name, price, originalPrice, image, rating, reviewCount, description, stock }}
+            trigger={
+              <button
+                className="p-2 bg-white/90 dark:bg-card/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all"
+                title="Quick View"
+                onClick={(e) => e.preventDefault()}
+              >
+                <Eye className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+            }
+          />
+          {/* Wishlist */}
+          <button
+            className="p-2 bg-white/90 dark:bg-card/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all"
+            title="Add to wishlist"
+            onClick={(e) => e.preventDefault()}
+          >
+            <Heart className="w-3.5 h-3.5 text-muted-foreground" />
+          </button>
+        </div>
+      </Link>
 
       {/* Content */}
-      <div className="p-3 md:p-4 flex flex-col">
-        {/* Product Name */}
-        <Link href={`/products/${id}`} className="hover:text-primary transition-colors group/name">
-          <h3 className="font-semibold text-sm md:text-base line-clamp-2 group-hover/name:text-primary mb-2">
+      <div className="p-3 sm:p-4 space-y-2">
+        {/* Name */}
+        <Link href={`/products/${id}`}>
+          <h3 className="font-medium text-[13px] sm:text-sm leading-tight line-clamp-2 text-foreground group-hover:text-primary transition-colors">
             {name}
           </h3>
         </Link>
 
         {/* Rating */}
-        <div className="flex items-center gap-1 mb-2 md:mb-3">
-          <div className="flex gap-0.5">
+        <div className="flex items-center gap-1">
+          <div className="flex gap-px">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`w-3 h-3 md:w-4 md:h-4 ${
-                  i < Math.round(Number(rating))
-                    ? 'fill-primary text-primary'
-                    : 'text-muted-foreground/50'
+                className={`w-3 h-3 ${
+                  i < Math.round(numRating)
+                    ? 'fill-amber-400 text-amber-400'
+                    : 'text-border'
                 }`}
               />
             ))}
           </div>
-          <span className="text-xs text-muted-foreground ml-1">
-            {reviewCount > 0 ? `(${reviewCount})` : '(0)'}
+          <span className="text-[11px] text-muted-foreground">
+            ({reviewCount || 0})
           </span>
         </div>
 
         {/* Price */}
-        <div className="flex items-center gap-2 mb-3 md:mb-4">
-          <span className="text-base md:text-lg font-bold text-primary">
-            ${numPrice.toFixed(2)}
+        <div className="flex items-baseline gap-2">
+          <span className="text-sm sm:text-base font-bold text-foreground">
+            {formatPrice(numPrice)}
           </span>
           {numOriginalPrice && numOriginalPrice > numPrice && (
-            <span className="text-xs md:text-sm text-muted-foreground line-through">
-              ${numOriginalPrice.toFixed(2)}
+            <span className="text-[11px] sm:text-xs text-muted-foreground line-through">
+              {formatPrice(numOriginalPrice)}
             </span>
           )}
         </div>
 
-        {/* Add to Cart Button */}
+        {/* Add to Cart */}
         <Button
           onClick={handleAddToCart}
-          disabled={isAdding}
-          className="w-full h-9 md:h-10 text-xs md:text-sm gap-2 font-medium"
+          disabled={added}
+          size="sm"
+          variant={added ? 'outline' : 'default'}
+          className="w-full h-9 sm:h-10 text-xs sm:text-sm gap-1.5 font-medium rounded-xl mt-1.5"
         >
-          {isAdding ? (
+          {added ? (
             <>
-              <div className="h-3 w-3 border-2 border-transparent border-t-current rounded-full animate-spin" />
-              Adding...
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="text-emerald-600">Added to Cart</span>
             </>
           ) : (
             <>
-              <ShoppingCart className="w-4 h-4" />
+              <ShoppingCart className="w-3.5 h-3.5" />
               Add to Cart
             </>
           )}
         </Button>
-
-        {/* Success Message */}
-        {message && (
-          <p className={`text-xs text-center mt-2 transition-opacity ${
-            message.includes('Added') ? 'text-green-600' : 'text-destructive'
-          }`}>
-            {message}
-          </p>
-        )}
       </div>
     </div>
   )

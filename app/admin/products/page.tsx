@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, Edit, Trash2, Loader2, Search } from 'lucide-react'
+import { Plus, Edit, Trash2, Loader2, Search, Download, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,15 +9,16 @@ import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getAllProducts, deleteProduct } from '@/app/actions/admin'
+import { exportProductsCSV } from '@/lib/utils/export-csv'
 
 interface Product {
   id: string
   name: string
-  price: number
+  price: string
   stock: number
-  image: string
-  category: string
-  isActive: boolean
+  image: string | null
+  categoryId: string
+  isActive: boolean | null
 }
 
 export default function AdminProductsPage() {
@@ -30,8 +31,10 @@ export default function AdminProductsPage() {
     const loadProducts = async () => {
       try {
         setLoading(true)
-        const data = await getAllProducts()
-        setProducts(data)
+        const result = await getAllProducts()
+        if (result.success && result.data) {
+          setProducts(result.data)
+        }
       } catch (err) {
         console.error('[v0] Load products error:', err)
       } finally {
@@ -49,7 +52,9 @@ export default function AdminProductsPage() {
       setDeleting(productId)
       await deleteProduct(productId)
       setProducts(products.filter(p => p.id !== productId))
-      alert('Product deleted successfully')
+      // Log activity
+      const { logActivity } = await import('@/lib/activity-log')
+      logActivity({ action: 'Deleted product', resource: 'product', resourceId: productId })
     } catch (err) {
       console.error('[v0] Delete error:', err)
       alert(err instanceof Error ? err.message : 'Failed to delete product')
@@ -66,12 +71,30 @@ export default function AdminProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Products</h1>
-        <Link href="/admin/products/new">
-          <Button className="gap-2 bg-primary hover:bg-primary/90">
-            <Plus className="w-4 h-4" />
-            Add Product
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => exportProductsCSV(products)}
+            variant="outline"
+            size="sm"
+            className="rounded-xl gap-2"
+            disabled={products.length === 0}
+          >
+            <Download className="w-4 h-4" />
+            Export
           </Button>
-        </Link>
+          <Link href="/admin/products/stock">
+            <Button variant="outline" size="sm" className="rounded-xl gap-2">
+              <Package className="w-4 h-4" />
+              Bulk Stock
+            </Button>
+          </Link>
+          <Link href="/admin/products/new">
+            <Button className="gap-2 rounded-xl">
+              <Plus className="w-4 h-4" />
+              Add Product
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search */}
@@ -114,13 +137,17 @@ export default function AdminProductsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-muted rounded overflow-hidden flex-shrink-0">
-                          <Image
-                            src={product.image}
-                            alt={product.name}
-                            width={40}
-                            height={40}
-                            className="w-full h-full object-cover"
-                          />
+                          {product.image ? (
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              width={40}
+                              height={40}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">N/A</div>
+                          )}
                         </div>
                         <div>
                           <p className="font-medium text-foreground">{product.name}</p>
@@ -128,8 +155,8 @@ export default function AdminProductsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{product.category}</td>
-                    <td className="px-6 py-4 text-sm font-semibold">PKR {product.price.toFixed(0)}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{product.categoryId}</td>
+                    <td className="px-6 py-4 text-sm font-semibold">GH₵ {parseFloat(product.price).toFixed(0)}</td>
                     <td className="px-6 py-4 text-sm">
                       <Badge variant={product.stock > 0 ? 'outline' : 'destructive'}>
                         {product.stock} units

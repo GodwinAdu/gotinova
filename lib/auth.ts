@@ -40,8 +40,6 @@ const getTrustedOrigins = () => {
     origins.add('http://localhost:3001')
     origins.add('http://localhost')
     
-    // Allow all v0 vusercontent.net domains in development
-    // This handles dynamic v0 domains that change on each preview
     return [...Array.from(origins)]
   }
   
@@ -56,12 +54,17 @@ const authConfig = {
   emailAndPassword: {
     enabled: true,
   },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    },
+  },
   advanced: {
     defaultCookieAttributes: {
       sameSite: process.env.NODE_ENV === 'development' ? 'none' as const : ('lax' as const),
       secure: process.env.NODE_ENV === 'development' ? true : true,
     },
-    // Disable CORS validation in development to handle dynamic v0 URLs
     disableCSRFCheck: process.env.NODE_ENV === 'development',
   },
 }

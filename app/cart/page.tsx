@@ -1,94 +1,58 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { headers } from 'next/headers'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Header } from '@/components/header'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Trash2, ShoppingBag } from 'lucide-react'
-import { getCart, removeFromCart, updateCartItem } from '@/app/actions/cart'
-
-interface CartItem {
-  id: string
-  productId: string
-  quantity: number
-  product: {
-    id: string
-    name: string
-    price: string
-    image?: string
-  }
-}
+import { Trash2, ShoppingBag, Minus, Plus, Lock, ArrowRight, ShieldCheck } from 'lucide-react'
+import { useCartStore } from '@/lib/store'
+import { useSession } from '@/lib/auth-client'
+import { formatPrice } from '@/lib/utils/format'
+import { CartItemSkeleton } from '@/components/skeletons'
+import { BundleDealBadge, calculateBundleSavings, getBundleDiscount } from '@/components/bundle-deal'
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [isUpdating, setIsUpdating] = useState<string | null>(null)
-  const [user, setUser] = useState<any>(null)
+  const router = useRouter()
+  const { data: session } = useSession()
+  const { items, updateQuantity, removeItem } = useCartStore()
+  const [mounted, setMounted] = useState(false)
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false)
 
+  // Hydration fix for Zustand persist
   useEffect(() => {
-    loadCart()
+    setMounted(true)
   }, [])
 
-  const loadCart = async () => {
-    try {
-      const result = await getCart()
-      if (result.success) {
-        setCartItems(result.data)
-      }
-    } catch (error) {
-      console.error('Error loading cart:', error)
-    } finally {
-      setLoading(false)
+  const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0)
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+  const bundleSavings = calculateBundleSavings(subtotal, totalItems)
+  const afterBundle = subtotal - bundleSavings
+  // These use fallback values; checkout page loads actual config from admin settings
+  const shipping = afterBundle > 1000 ? 0 : 50
+  const tax = afterBundle * 0.125
+  const total = afterBundle + shipping + tax
+
+  const handleCheckout = () => {
+    if (!session?.user) {
+      setShowAuthPrompt(true)
+      return
     }
+    router.push('/checkout')
   }
 
-  const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
-    if (newQuantity < 1) return
-    setIsUpdating(itemId)
-    try {
-      const result = await updateCartItem(itemId, newQuantity)
-      if (result.success) {
-        setCartItems(
-          cartItems.map((item) =>
-            item.id === itemId ? { ...item, quantity: newQuantity } : item
-          )
-        )
-      }
-    } catch (error) {
-      console.error('Error updating cart:', error)
-    } finally {
-      setIsUpdating(null)
-    }
-  }
-
-  const handleRemove = async (itemId: string) => {
-    try {
-      const result = await removeFromCart(itemId)
-      if (result.success) {
-        setCartItems(cartItems.filter((item) => item.id !== itemId))
-      }
-    } catch (error) {
-      console.error('Error removing item:', error)
-    }
-  }
-
-  const subtotal = cartItems.reduce(
-    (total, item) => total + parseFloat(item.product.price) * item.quantity,
-    0
-  )
-  const tax = subtotal * 0.1
-  const total = subtotal + tax
-
-  if (loading) {
+  if (!mounted) {
     return (
       <>
-        <Header user={user} />
+        <Header user={session?.user} />
         <main className="min-h-screen bg-background">
-          <div className="container max-w-7xl mx-auto px-4 py-8">
-            <p className="text-center text-muted-foreground">Loading cart...</p>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="space-y-4">
+              <div className="h-8 bg-muted rounded w-48 animate-pulse" />
+              <CartItemSkeleton />
+              <CartItemSkeleton />
+            </div>
           </div>
         </main>
       </>
@@ -97,145 +61,218 @@ export default function CartPage() {
 
   return (
     <>
-      <Header user={user} />
+      <Header user={session?.user} />
       <main className="min-h-screen bg-background">
-        <div className="container max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Shopping Cart</h1>
 
-          {cartItems.length === 0 ? (
-            <div className="text-center py-12">
-              <ShoppingBag className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-xl font-semibold mb-2">Your cart is empty</h2>
-              <p className="text-muted-foreground mb-6">Add some items to get started!</p>
-              <Button asChild>
-                <Link href="/products">Continue Shopping</Link>
+          {items.length === 0 ? (
+            <div className="text-center py-16 sm:py-20">
+              <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-muted/60 flex items-center justify-center">
+                <ShoppingBag className="w-9 h-9 text-muted-foreground/60" />
+              </div>
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Your cart is empty</h2>
+              <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
+                Looks like you haven&apos;t added any items yet. Explore our collection to find something you love.
+              </p>
+              <Button asChild className="rounded-xl">
+                <Link href="/products">
+                  Browse Products
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
               </Button>
             </div>
           ) : (
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
               {/* Cart Items */}
-              <div className="lg:col-span-2">
-                <div className="space-y-4">
-                  {cartItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex gap-4 p-4 bg-card border rounded-lg"
-                    >
-                      {/* Product Image */}
-                      <div className="w-24 h-24 bg-muted rounded flex-shrink-0">
-                        {item.product.image ? (
+              <div className="lg:col-span-2 space-y-3">
+                <p className="text-sm text-muted-foreground mb-3">
+                  {items.length} item{items.length > 1 ? 's' : ''} in cart
+                </p>
+                {items.map((item) => (
+                  <div
+                    key={item.productId}
+                    className="flex gap-3 sm:gap-4 p-3 sm:p-4 bg-card border border-border/60 rounded-2xl"
+                  >
+                    {/* Image */}
+                    <Link href={`/products/${item.productId}`} className="flex-shrink-0">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-muted rounded-xl overflow-hidden">
+                        {item.image && item.image !== '/placeholder.jpg' ? (
                           <Image
-                            src={item.product.image}
-                            alt={item.product.name}
+                            src={item.image}
+                            alt={item.name}
                             width={96}
                             height={96}
-                            className="w-full h-full object-cover rounded"
+                            className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
                             No image
                           </div>
                         )}
                       </div>
+                    </Link>
 
-                      {/* Product Info */}
-                      <div className="flex-1">
-                        <Link
-                          href={`/products/${item.productId}`}
-                          className="font-semibold hover:text-primary transition"
-                        >
-                          {item.product.name}
-                        </Link>
-                        <p className="text-lg font-bold text-primary mt-2">
-                          ${parseFloat(item.product.price).toFixed(2)}
-                        </p>
-                      </div>
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        href={`/products/${item.productId}`}
+                        className="font-medium text-sm sm:text-base hover:text-primary transition-colors line-clamp-2"
+                      >
+                        {item.name}
+                      </Link>
+                      <p className="text-base sm:text-lg font-bold text-foreground mt-1">
+                        {formatPrice(item.price)}
+                      </p>
 
-                      {/* Quantity */}
-                      <div className="flex flex-col items-end gap-2">
-                        <div className="flex items-center gap-2">
+                      {/* Quantity controls — mobile-friendly */}
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center border border-border rounded-xl overflow-hidden">
                           <button
-                            onClick={() =>
-                              handleUpdateQuantity(item.id, item.quantity - 1)
-                            }
-                            disabled={isUpdating === item.id || item.quantity <= 1}
-                            className="px-2 py-1 border rounded hover:bg-muted disabled:opacity-50"
+                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                            disabled={item.quantity <= 1}
+                            className="p-2 hover:bg-muted transition-colors disabled:opacity-30"
+                            aria-label="Decrease quantity"
                           >
-                            −
+                            <Minus className="w-3.5 h-3.5" />
                           </button>
-                          <Input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) =>
-                              handleUpdateQuantity(item.id, parseInt(e.target.value) || 1)
-                            }
-                            className="w-16 text-center"
-                            min="1"
-                            disabled={isUpdating === item.id}
-                          />
+                          <span className="px-3 sm:px-4 py-1.5 text-sm font-medium min-w-[2.5rem] text-center">
+                            {item.quantity}
+                          </span>
                           <button
-                            onClick={() =>
-                              handleUpdateQuantity(item.id, item.quantity + 1)
-                            }
-                            disabled={isUpdating === item.id}
-                            className="px-2 py-1 border rounded hover:bg-muted disabled:opacity-50"
+                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                            className="p-2 hover:bg-muted transition-colors"
+                            aria-label="Increase quantity"
                           >
-                            +
+                            <Plus className="w-3.5 h-3.5" />
                           </button>
                         </div>
+
                         <button
-                          onClick={() => handleRemove(item.id)}
-                          className="p-2 text-destructive hover:bg-destructive/10 rounded transition"
+                          onClick={() => removeItem(item.productId)}
+                          className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all"
+                          aria-label="Remove item"
                         >
-                          <Trash2 className="w-5 h-5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
 
               {/* Order Summary */}
               <div className="h-fit">
-                <div className="bg-card border rounded-lg p-6 sticky top-20">
-                  <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
+                <div className="bg-card border border-border/60 rounded-2xl p-5 sm:p-6 sticky top-20 space-y-5">
+                  <h3 className="text-lg font-semibold">Order Summary</h3>
 
-                  <div className="space-y-3 mb-6 pb-6 border-b">
-                    <div className="flex justify-between text-sm">
-                      <span>Subtotal</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                  {/* Bundle deal indicator */}
+                  <BundleDealBadge />
+
+                  <div className="space-y-2.5 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="font-medium">{formatPrice(subtotal)}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Tax (10%)</span>
-                      <span>${tax.toFixed(2)}</span>
+                    {bundleSavings > 0 && (
+                      <div className="flex justify-between text-emerald-600">
+                        <span>Bundle Discount ({getBundleDiscount(totalItems)?.discount}%)</span>
+                        <span className="font-medium">-{formatPrice(bundleSavings)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Shipping</span>
+                      <span className="font-medium">
+                        {shipping === 0 ? (
+                          <span className="text-emerald-600">Free</span>
+                        ) : (
+                          formatPrice(shipping)
+                        )}
+                      </span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Shipping</span>
-                      <span>Free</span>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tax (12.5%)</span>
+                      <span className="font-medium">{formatPrice(tax)}</span>
                     </div>
                   </div>
 
-                  <div className="flex justify-between font-bold text-lg mb-6">
-                    <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                  <div className="border-t border-border pt-4 flex justify-between items-center">
+                    <span className="font-bold text-base">Total</span>
+                    <span className="text-xl font-bold text-primary">{formatPrice(total)}</span>
                   </div>
 
-                  <Button className="w-full" size="lg">
+                  {shipping > 0 && (
+                    <p className="text-[11px] text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+                      💡 Add {formatPrice(1000 - subtotal)} more for free shipping
+                    </p>
+                  )}
+
+                  <Button
+                    onClick={handleCheckout}
+                    className="w-full h-11 rounded-xl text-sm font-medium shadow-sm"
+                    size="lg"
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
                     Proceed to Checkout
                   </Button>
 
-                  <Button
-                    variant="outline"
-                    className="w-full mt-3"
-                    asChild
-                  >
-                    <Link href="/products">Continue Shopping</Link>
+                  <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Secure checkout
+                  </div>
+
+                  <Button variant="ghost" size="sm" asChild className="w-full text-muted-foreground">
+                    <Link href="/products">← Continue Shopping</Link>
                   </Button>
                 </div>
               </div>
             </div>
           )}
         </div>
+
+        {/* Auth Prompt Modal */}
+        {showAuthPrompt && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+              onClick={() => setShowAuthPrompt(false)}
+            />
+
+            {/* Modal */}
+            <div className="relative bg-card border border-border/60 rounded-3xl shadow-2xl w-full max-w-sm p-6 sm:p-8 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 space-y-5">
+              <div className="text-center space-y-3">
+                <div className="w-14 h-14 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center">
+                  <Lock className="w-6 h-6 text-primary" />
+                </div>
+                <h2 className="text-xl font-bold">Sign in to checkout</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Create an account or sign in to complete your purchase. Your cart items will be waiting for you.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <Button asChild className="w-full h-11 rounded-xl font-medium">
+                  <Link href="/sign-in?redirect=/cart">
+                    Sign In
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full h-11 rounded-xl font-medium">
+                  <Link href="/sign-up?redirect=/cart">
+                    Create Account
+                  </Link>
+                </Button>
+              </div>
+
+              <button
+                onClick={() => setShowAuthPrompt(false)}
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors pt-1"
+              >
+                Continue browsing
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </>
   )

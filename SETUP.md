@@ -1,334 +1,171 @@
-# LuxeHair Setup Guide
+# GotiNova - Setup Guide
 
-This guide will help you get the LuxeHair e-commerce platform up and running.
+## Quick Start
 
-## Prerequisites
-
-- Node.js 18+ installed
-- pnpm package manager (`npm install -g pnpm`)
-- Neon PostgreSQL account or self-hosted PostgreSQL
-- A code editor (VS Code recommended)
-
-## Step 1: Clone and Install
+### 1. Install Dependencies
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd luxehair
-
-# Install dependencies
-pnpm install
+npm install
 ```
 
-## Step 2: Set Up Database
+### 2. Set Up PostgreSQL Database
 
-### Option A: Neon (Recommended)
+You need a PostgreSQL database. Here are your options:
 
-1. Go to [Neon](https://neon.tech)
-2. Create a new database project
-3. Copy the connection string
-4. It should look like: `postgresql://user:password@ep-xxx.region.neon.tech/neondb`
+#### Option A: Neon (Recommended — Free & Serverless)
 
-### Option B: Local PostgreSQL
-
-1. Install PostgreSQL locally
-2. Create a new database:
-   ```bash
-   createdb luxehair
+1. Go to [neon.tech](https://neon.tech) and create a free account
+2. Create a new project (name it "gotinova" or anything)
+3. Copy the connection string — it looks like:
    ```
-3. Connection string: `postgresql://user:password@localhost:5432/luxehair`
+   postgresql://username:password@ep-cool-name-123456.us-east-2.aws.neon.tech/neondb?sslmode=require
+   ```
+4. Paste it as your `DATABASE_URL` in `.env`
 
-## Step 3: Configure Environment Variables
+#### Option B: Supabase (Free tier)
 
-Create a `.env.local` file in the project root:
+1. Go to [supabase.com](https://supabase.com) and create a project
+2. Go to Settings > Database > Connection string
+3. Copy the URI (use "Transaction" mode for serverless)
+4. Paste it as your `DATABASE_URL` in `.env`
+
+#### Option C: Railway
+
+1. Go to [railway.app](https://railway.app)
+2. Click "New Project" > "Provision PostgreSQL"
+3. Go to Variables tab and copy `DATABASE_URL`
+4. Paste it in your `.env`
+
+#### Option D: Local PostgreSQL
+
+If you have PostgreSQL installed locally:
+```
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/gotinova
+```
+
+Create the database first:
+```bash
+psql -U postgres -c "CREATE DATABASE gotinova;"
+```
+
+### 3. Set Up Environment Variables
+
+Copy the example env file:
+
+```bash
+cp .env.example .env
+```
+
+Then fill in your values:
 
 ```env
-# Database (copy from Neon or your local setup)
-DATABASE_URL=postgresql://user:password@host:port/database
+# Your PostgreSQL connection string from Step 2
+DATABASE_URL=postgresql://...
 
-# Authentication Secret (generate with: openssl rand -base64 32)
-BETTER_AUTH_SECRET=your-generated-secret-here
+# Generate a random secret (32+ chars)
+# You can use: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+BETTER_AUTH_SECRET=paste-your-generated-secret-here
 
-# Auth URL (for local development)
+# Your app URL
 BETTER_AUTH_URL=http://localhost:3000
-
-# App URL
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-### Generate BETTER_AUTH_SECRET
+### 4. Create Database Tables
 
-Run this command to generate a secure random secret:
-
-```bash
-# On macOS/Linux
-openssl rand -base64 32
-
-# On Windows (PowerShell)
-[Convert]::ToBase64String([Security.Cryptography.RNGCryptoServiceProvider]::new().GetBytes(32))
-```
-
-## Step 4: Initialize Database Schema
-
-The database schema has already been set up through Neon MCP during development. If you need to reset:
+Run the seed script to create all tables:
 
 ```bash
-# List current tables
-psql $DATABASE_URL -c "\dt"
-
-# The following tables should exist:
-# - user, session, account, verification (auth)
-# - categories, products, productAttributes
-# - cartItems, wishlistItems
-# - orders, orderItems, deliveryTracking
-# - reviews, coupons, analytics, adminUsers, frequentlyBoughtTogether
+npm run seed
 ```
 
-## Step 5: Run Development Server
+Or manually push the schema using the SQL in `scripts/seed.sql`.
+
+### 5. Set Up Google OAuth (Optional but Recommended)
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Navigate to **APIs & Services** > **Credentials**
+4. Click **"Create Credentials"** > **"OAuth client ID"**
+5. Select **"Web application"**
+6. Set the following:
+   - **Name**: GotiNova (or anything)
+   - **Authorized JavaScript origins**: 
+     - `http://localhost:3000`
+   - **Authorized redirect URIs**:
+     - `http://localhost:3000/api/auth/callback/google`
+7. Click Create and copy the **Client ID** and **Client Secret**
+8. Add to your `.env`:
+
+```env
+GOOGLE_CLIENT_ID=123456789-abcdef.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-your-secret-here
+```
+
+> **For production**: Add your production domain to both origins and redirect URIs:
+> - Origin: `https://yourdomain.com`
+> - Redirect: `https://yourdomain.com/api/auth/callback/google`
+
+### 6. Run the Development Server
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
-The application will start at `http://localhost:3000`
-
-## Step 6: Create Test Account
-
-1. Visit `http://localhost:3000/sign-up`
-2. Enter an email and password (min 8 characters)
-3. Create account and sign in
-
-## Step 7: Admin Setup
-
-To access the admin panel, you'll need to set a user as admin in the database:
-
-```sql
--- Connect to your database
-psql $DATABASE_URL
-
--- Create or modify a user to be admin
-INSERT INTO "adminUsers" (id, "userId", role, "isActive", "createdAt", "updatedAt")
-VALUES (
-  gen_random_uuid()::text,
-  'YOUR_USER_ID',
-  'admin',
-  true,
-  now(),
-  now()
-);
-```
-
-Then visit `http://localhost:3000/admin`
-
-## Common Issues & Solutions
-
-### Database Connection Error
-
-**Problem**: `Error: connect ECONNREFUSED 127.0.0.1:5432`
-
-**Solution**:
-- Check if PostgreSQL is running
-- Verify `DATABASE_URL` is correct
-- For Neon: Ensure database is active
-
-### Auth Error: "BETTER_AUTH_SECRET not set"
-
-**Problem**: Authentication fails on startup
-
-**Solution**:
-```bash
-# Generate new secret
-openssl rand -base64 32
-
-# Update .env.local with the generated value
-BETTER_AUTH_SECRET=<paste-generated-value>
-
-# Restart dev server
-pnpm dev
-```
-
-### Module Not Found Errors
-
-**Problem**: `Module not found: can't resolve '@/lib/...`
-
-**Solution**:
-```bash
-# Clear cache and reinstall
-rm -rf node_modules .next
-pnpm install
-pnpm dev
-```
-
-### Port Already in Use
-
-**Problem**: `Error: listen EADDRINUSE: address already in use :::3000`
-
-**Solution**:
-```bash
-# Kill process on port 3000
-lsof -ti:3000 | xargs kill -9
-
-# Or use different port
-PORT=3001 pnpm dev
-```
-
-## Seed Database with Sample Data
-
-To add sample products and categories:
-
-```bash
-# Create a new file: scripts/seed.ts
-# Then run:
-pnpm ts-node scripts/seed.ts
-```
-
-Example seed script structure (create if needed):
-
-```typescript
-import { db } from '@/lib/db'
-import { categories, products } from '@/lib/db/schema'
-
-async function seed() {
-  // Add categories
-  // Add products
-  // Add reviews
-  console.log('Seeding complete!')
-}
-
-seed().catch(console.error)
-```
-
-## Project Structure Reference
-
-```
-/app                 # Next.js app routes and pages
-  /api              # API endpoints
-  /admin            # Admin pages
-  /products         # Product pages
-  /orders           # Order pages
-  layout.tsx        # Root layout
-
-/components          # React components
-  /ui               # Reusable UI components
-  
-/lib                 # Utilities and configs
-  /db               # Database setup
-  auth.ts           # Authentication config
-  store.ts          # Global state (Zustand)
-  constants.ts      # App constants
-  
-/public              # Static files
-middleware.ts        # Route middleware
-```
-
-## Development Workflow
-
-1. **Create feature branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Make changes**
-   - Edit components in `/components`
-   - Add pages in `/app`
-   - Update database operations in actions
-
-3. **Test locally**
-   ```bash
-   pnpm dev
-   ```
-
-4. **Format and lint**
-   ```bash
-   pnpm format
-   pnpm lint
-   ```
-
-5. **Commit and push**
-   ```bash
-   git add .
-   git commit -m "Add your feature description"
-   git push origin feature/your-feature-name
-   ```
-
-## Deployment
-
-### Deploy to Vercel
-
-1. Push to GitHub
-2. Connect repo to Vercel
-3. Set environment variables in Vercel dashboard
-4. Deploy
-
-```bash
-vercel deploy
-```
-
-### Set Environment Variables on Vercel
-
-1. Go to Vercel dashboard
-2. Select your project
-3. Settings → Environment Variables
-4. Add:
-   - `DATABASE_URL`
-   - `BETTER_AUTH_SECRET`
-   - `BETTER_AUTH_URL` (production URL)
-   - `NEXT_PUBLIC_APP_URL`
-
-## Monitoring and Logs
-
-### View Logs in Development
-
-```bash
-# Logs appear in terminal where you ran `pnpm dev`
-pnpm dev  # Watch for [v0] console.log statements
-```
-
-### View Production Logs
-
-Visit Vercel dashboard → Functions/Logs
-
-## Performance Optimization
-
-- Images are automatically optimized by Next.js
-- Database queries use Drizzle ORM for optimization
-- Zustand stores for client-side state management
-- Server-side rendering where appropriate
-
-## Security Checklist
-
-- [ ] Database URL hidden in .env.local (not committed)
-- [ ] BETTER_AUTH_SECRET is random and strong
-- [ ] CORS headers properly configured
-- [ ] Environment variables set on production
-- [ ] Database backups configured
-- [ ] SSL/TLS enabled
-
-## Getting Help
-
-- Check docs in `/SETUP.md` and `/README.md`
-- Review example code in `/components` and `/app`
-- Check console for `[v0]` debug messages
-- Look at error stack traces carefully
-
-## Next Steps
-
-1. ✅ Database set up
-2. ✅ Environment configured
-3. ✅ Dev server running
-4. 👉 Create sample products
-5. 👉 Test shopping flow
-6. 👉 Set up admin panel
-7. 👉 Configure deployment
-
-## Support
-
-For issues or questions:
-- Check the README.md
-- Review error messages in console
-- Check Neon dashboard for database status
-- Verify environment variables are set
+Open [http://localhost:3000](http://localhost:3000) — you're live!
 
 ---
 
-**Last Updated**: June 2026
+## Database Schema
+
+Better Auth automatically creates its own tables (`user`, `session`, `account`, `verification`) when the first auth request is made. The app tables (products, orders, etc.) are created by the seed script.
+
+### Tables created by Better Auth:
+- `user` — User accounts
+- `session` — Active sessions
+- `account` — OAuth provider links (Google, etc.)
+- `verification` — Email verification tokens
+
+### App tables (created by seed):
+- `categories` — Product categories
+- `products` — Product catalog
+- `productAttributes` — Product specs (length, color, etc.)
+- `cartItems` — Shopping cart
+- `wishlistItems` — User wishlists
+- `orders` — Customer orders
+- `orderItems` — Items in each order
+- `reviews` — Product reviews
+- `deliveryTracking` — Shipment tracking
+- `coupons` — Discount codes
+- `analytics` — Sales analytics
+- `adminUsers` — Admin access control
+- `frequentlyBoughtTogether` — Product recommendations
+
+---
+
+## Production Deployment (Vercel)
+
+1. Push your code to GitHub
+2. Go to [vercel.com](https://vercel.com) and import the repo
+3. Add all environment variables from your `.env` file
+4. Update `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` to your Vercel domain
+5. Update Google OAuth redirect URI to include your production domain
+6. Deploy!
+
+---
+
+## Troubleshooting
+
+### "Connection refused" / Database errors
+- Make sure your `DATABASE_URL` is correct
+- If using Neon/Supabase, ensure `?sslmode=require` is in the URL
+- Check that your IP is allowed (some providers have IP allowlists)
+
+### Google sign-in not working
+- Verify redirect URI matches exactly: `http://localhost:3000/api/auth/callback/google`
+- Make sure both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set
+- Check Google Cloud Console for any errors in the OAuth consent screen
+
+### Auth cookies not being set
+- Make sure `BETTER_AUTH_URL` matches where you access the app
+- In development, cookies use `sameSite: 'none'` which requires HTTPS in some browsers

@@ -6,8 +6,8 @@ import { headers } from 'next/headers'
 import { auth } from '@/lib/auth'
 
 export const metadata = {
-  title: 'About LuxeHair',
-  description: 'Learn about our premium hair and wig collection',
+  title: 'About GotiNova',
+  description: 'Learn about our premium hair and beauty collection',
 }
 
 export default async function AboutPage() {
@@ -20,7 +20,7 @@ export default async function AboutPage() {
         {/* Hero */}
         <section className="bg-gradient-to-r from-primary/10 to-accent/10 py-20">
           <div className="container max-w-7xl mx-auto px-4 text-center">
-            <h1 className="text-5xl font-bold mb-4 text-balance">About LuxeHair</h1>
+            <h1 className="text-5xl font-bold mb-4 text-balance">About GotiNova</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
               Premium quality hair and wigs for every style, every person, every occasion
             </p>
@@ -32,7 +32,7 @@ export default async function AboutPage() {
           <div className="container max-w-4xl mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8">Our Story</h2>
             <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-              LuxeHair was founded with a simple mission: to provide premium quality hairpieces that
+              GotiNova was founded with a simple mission: to provide premium quality hairpieces that
               enhance confidence and self-expression. We believe that everyone deserves to feel
               beautiful and confident, regardless of their hair journey.
             </p>
@@ -43,7 +43,7 @@ export default async function AboutPage() {
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
               Whether you&apos;re looking for a everyday style, a glamorous transformation, or
-              medical solutions, LuxeHair has the perfect solution for you.
+              medical solutions, GotiNova has the perfect solution for you.
             </p>
           </div>
         </section>
@@ -110,9 +110,9 @@ export default async function AboutPage() {
               Have questions? We&apos;d love to hear from you
             </p>
             <div className="space-y-2">
-              <p className="text-muted-foreground">Email: support@luxehair.com</p>
-              <p className="text-muted-foreground">Phone: 1-800-HAIR-LUX</p>
-              <p className="text-muted-foreground">Hours: Monday - Friday, 9AM - 6PM EST</p>
+              <p className="text-muted-foreground">Email: achaempomaatina352@gmail.com</p>
+              <p className="text-muted-foreground">Phone: +233 24 959 5624</p>
+              <p className="text-muted-foreground">Location: Kumasi, Ghana</p>
             </div>
           </div>
         </section>

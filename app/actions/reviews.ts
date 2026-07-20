@@ -18,6 +18,7 @@ export async function createReview(productId: string, data: {
   rating: number
   title: string
   comment: string
+  images?: string[]
 }) {
   try {
     const userId = await getUserId()
@@ -34,6 +35,9 @@ export async function createReview(productId: string, data: {
     }
 
     // Create review
+    const { getReviewConfig } = await import('@/app/actions/settings')
+    const reviewConfig = await getReviewConfig()
+
     await db.insert(reviews).values({
       id: uuid(),
       userId,
@@ -41,26 +45,41 @@ export async function createReview(productId: string, data: {
       rating: data.rating,
       title: data.title,
       comment: data.comment,
-      status: 'pending',
+      images: data.images && data.images.length > 0 ? JSON.stringify(data.images) : null,
+      status: reviewConfig.autoApprove ? 'approved' : 'pending',
     })
 
     revalidatePath(`/products/${productId}`)
-    return { success: true, message: 'Review submitted successfully' }
+    return { success: true, message: 'Review submitted successfully! Thank you for your feedback.' }
   } catch (error) {
     console.error('Error creating review:', error)
     return { success: false, error: 'Failed to create review' }
   }
 }
 
-export async function getProductReviews(productId: string, limit = 10) {
+export async function getProductReviews(productId: string, limit = 20) {
   try {
+    const { user: userTable } = await import('@/lib/db/schema')
+
     const result = await db
-      .select()
+      .select({
+        id: reviews.id,
+        userId: reviews.userId,
+        rating: reviews.rating,
+        title: reviews.title,
+        comment: reviews.comment,
+        images: reviews.images,
+        verified: reviews.verified,
+        helpful: reviews.helpful,
+        createdAt: reviews.createdAt,
+        userName: userTable.name,
+      })
       .from(reviews)
+      .leftJoin(userTable, eq(reviews.userId, userTable.id))
       .where(
         and(
           eq(reviews.productId, productId),
-          eq(reviews.status, 'pending')
+          eq(reviews.status, 'approved')
         )
       )
       .limit(limit)

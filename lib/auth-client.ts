@@ -16,3 +16,6 @@ export const authClient = createAuthClient({
   baseURL: getBaseURL(),
   basePath: '/api/auth',
 })
+
+// Re-export useSession hook for convenience
+export const useSession = authClient.useSession

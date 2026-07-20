@@ -3,28 +3,36 @@
  */
 
 // App Info
-export const APP_NAME = 'LuxeHair'
-export const APP_DESCRIPTION = 'Premium Hair & Wig Store - Authentic, High-Quality Hairpieces'
+export const APP_NAME = 'GotiNova'
+export const APP_DESCRIPTION = 'Premium Hair & Beauty Store - Authentic, High-Quality Hairpieces'
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+// Store Contact (WhatsApp)
+// Format: country code + number without + or spaces (e.g. 233249595624)
+export const STORE_WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '233249595624'
+export const STORE_PHONE = '+233 24 959 5624'
+export const STORE_EMAIL = 'achaempomaatina352@gmail.com'
 
 // Pagination
 export const ITEMS_PER_PAGE = 12
 export const ADMIN_ITEMS_PER_PAGE = 20
 
 // Pricing
-export const DEFAULT_SHIPPING_COST = 500
-export const TAX_RATE = 0.17
-export const MINIMUM_ORDER_AMOUNT = 1000
+export const DEFAULT_SHIPPING_COST = 50
+export const TAX_RATE = 0.125
+export const MINIMUM_ORDER_AMOUNT = 100
+export const CURRENCY_SYMBOL = 'GH₵'
+export const CURRENCY_CODE = 'GHS'
 
 // Product Categories
+// Default Product Categories (admin can create more from the dashboard)
 export const PRODUCT_CATEGORIES = [
-  { id: '1', name: 'Brazilian Hair', description: 'High-quality Brazilian hair bundles' },
-  { id: '2', name: 'Malaysian Hair', description: 'Luxurious Malaysian hair extensions' },
-  { id: '3', name: 'Peruvian Hair', description: 'Premium Peruvian hair wigs' },
-  { id: '4', name: 'Indian Hair', description: 'Authentic Indian hair products' },
-  { id: '5', name: 'Closure & Frontals', description: 'HD lace closures and frontals' },
-  { id: '6', name: 'Wigs', description: 'Ready-to-wear wigs' },
-  { id: '7', name: 'Accessories', description: 'Hair care accessories' },
+  { id: '1', name: 'Hair & Wigs', description: 'Wigs, extensions, and hair products' },
+  { id: '2', name: 'Beauty & Skincare', description: 'Skincare, makeup, and beauty tools' },
+  { id: '3', name: 'Fashion', description: 'Clothing, bags, and accessories' },
+  { id: '4', name: 'Electronics', description: 'Gadgets and tech accessories' },
+  { id: '5', name: 'Health & Wellness', description: 'Supplements and health products' },
+  { id: '6', name: 'Home & Living', description: 'Home decor and essentials' },
 ]
 
 // Product Attributes
@@ -96,35 +104,36 @@ export const REVIEW_STATUS = {
   REJECTED: 'rejected',
 } as const
 
-// Cities in Pakistan
-export const PAKISTAN_CITIES = [
-  'Karachi',
-  'Lahore',
-  'Islamabad',
-  'Rawalpindi',
-  'Peshawar',
-  'Multan',
-  'Faisalabad',
-  'Hyderabad',
-  'Quetta',
-  'Gujranwala',
-  'Sialkot',
-  'Sargodha',
-  'Bahawalpur',
-  'Jhang',
-  'Dera Ghazi Khan',
-  'Larkana',
-  'Sukkur',
-  'Shikarpur',
-  'Mirpur Khas',
-  'Thatta',
+// Cities in Ghana
+export const GHANA_CITIES = [
+  'Accra',
+  'Kumasi',
+  'Tamale',
+  'Takoradi',
+  'Cape Coast',
+  'Tema',
+  'Obuasi',
+  'Sunyani',
+  'Ho',
+  'Koforidua',
+  'Wa',
+  'Bolgatanga',
+  'Techiman',
+  'Nkawkaw',
+  'Winneba',
+  'Tarkwa',
+  'Hohoe',
+  'Keta',
+  'Dunkwa',
+  'Ejura',
 ]
 
 // Payment Methods
 export const PAYMENT_METHODS = {
   COD: 'cod',
-  ADVANCE: 'advance',
+  PAYSTACK: 'paystack',
   CARD: 'card',
+  MOBILE_MONEY: 'mobile_money',
   BANK_TRANSFER: 'bank_transfer',
 } as const
 
@@ -181,11 +190,11 @@ export const STORAGE_KEYS = {
 // Filter Options
 export const FILTER_OPTIONS = {
   priceRanges: [
-    { label: 'Under 5,000', min: 0, max: 5000 },
-    { label: '5,000 - 10,000', min: 5000, max: 10000 },
-    { label: '10,000 - 20,000', min: 10000, max: 20000 },
-    { label: '20,000 - 50,000', min: 20000, max: 50000 },
-    { label: 'Over 50,000', min: 50000, max: Infinity },
+    { label: 'Under 500', min: 0, max: 500 },
+    { label: '500 - 1,000', min: 500, max: 1000 },
+    { label: '1,000 - 2,000', min: 1000, max: 2000 },
+    { label: '2,000 - 5,000', min: 2000, max: 5000 },
+    { label: 'Over 5,000', min: 5000, max: Infinity },
   ],
   sortOptions: [
     { label: 'Newest', value: 'newest' },
@@ -218,7 +227,7 @@ export const HTTP_STATUS = {
 // Regex Patterns
 export const REGEX_PATTERNS = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  PHONE_PK: /^(\+92|0)?[0-9]{10}$/,
+  PHONE_GH: /^(\+233|0)?[0-9]{9}$/,
   URL: /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
   SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
 } as const

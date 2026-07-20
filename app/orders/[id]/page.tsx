@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Package, Truck } from 'lucide-react'
 import { getOrderDetails, getOrderTracking } from '@/app/actions/orders'
+import { WhatsAppButton } from '@/components/whatsapp-button'
+import { generateOrderInquiryLink } from '@/lib/utils/whatsapp'
+import { OrderTimeline } from '@/components/order-timeline'
 
 interface OrderItem {
   id: string
@@ -22,23 +25,23 @@ interface Order {
   orderNumber: string
   totalAmount: string
   subtotal: string
-  shippingCost: string
-  tax: string
-  status: string
-  paymentStatus: string
-  shippingAddress: string
-  billingAddress: string
-  paymentMethod: string
+  shippingCost: string | null
+  tax: string | null
+  status: string | null
+  paymentStatus: string | null
+  shippingAddress: string | null
+  billingAddress: string | null
+  paymentMethod: string | null
   createdAt: Date
 }
 
 interface Tracking {
   id: string
-  trackingNumber?: string
-  carrier?: string
-  status: string
-  currentLocation?: string
-  estimatedDelivery?: Date
+  trackingNumber?: string | null
+  carrier?: string | null
+  status: string | null
+  currentLocation?: string | null
+  estimatedDelivery?: Date | null
 }
 
 export default function OrderDetailsPage() {
@@ -61,13 +64,13 @@ export default function OrderDetailsPage() {
         getOrderTracking(orderId),
       ])
 
-      if (detailsResult.success) {
+      if (detailsResult.success && detailsResult.data) {
         setOrder(detailsResult.data.order)
         setItems(detailsResult.data.items)
       }
 
       if (trackingResult.success) {
-        setTracking(trackingResult.data)
+        setTracking(trackingResult.data || null)
       }
     } catch (error) {
       console.error('Error loading order details:', error)
@@ -135,10 +138,15 @@ export default function OrderDetailsPage() {
                   Placed on {new Date(order.createdAt).toLocaleDateString()}
                 </p>
               </div>
-              <Badge variant="default" className="text-lg px-4 py-2">
-                {order.status.toUpperCase()}
+                <Badge variant={getStatusBadge(order.status || 'pending')} className="text-lg px-4 py-2">
+                {(order.status || 'pending').toUpperCase()}
               </Badge>
             </div>
+          </div>
+
+          {/* Order Tracking Timeline */}
+          <div className="bg-card border rounded-2xl p-5 sm:p-6 mb-6">
+            <OrderTimeline status={order.status} createdAt={order.createdAt} />
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
@@ -162,9 +170,9 @@ export default function OrderDetailsPage() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">${parseFloat(item.subtotal).toFixed(2)}</p>
+                        <p className="font-semibold">GH₵ {parseFloat(item.subtotal).toFixed(0)}</p>
                         <p className="text-sm text-muted-foreground">
-                          ${parseFloat(item.price).toFixed(2)} each
+                          GH₵ {parseFloat(item.price).toFixed(0)} each
                         </p>
                       </div>
                     </div>
@@ -221,28 +229,28 @@ export default function OrderDetailsPage() {
                 <div className="space-y-3 pb-4 border-b">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal</span>
-                    <span>${parseFloat(order.subtotal).toFixed(2)}</span>
+                    <span>GH₵ {parseFloat(order.subtotal || '0').toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Shipping</span>
-                    <span>${parseFloat(order.shippingCost).toFixed(2)}</span>
+                    <span>GH₵ {parseFloat(order.shippingCost || '0').toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Tax</span>
-                    <span>${parseFloat(order.tax).toFixed(2)}</span>
+                    <span>GH₵ {parseFloat(order.tax || '0').toFixed(0)}</span>
                   </div>
                 </div>
 
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span>${parseFloat(order.totalAmount).toFixed(2)}</span>
+                  <span>GH₵ {parseFloat(order.totalAmount || '0').toFixed(0)}</span>
                 </div>
 
                 <div className="pt-4 border-t space-y-3 text-sm">
                   <div>
                     <p className="text-muted-foreground mb-1">Payment Status</p>
                     <Badge variant="default">
-                      {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                      {((order.paymentStatus || 'pending').charAt(0).toUpperCase() + (order.paymentStatus || 'pending').slice(1))}
                     </Badge>
                   </div>
                   {order.paymentMethod && (
@@ -251,6 +259,17 @@ export default function OrderDetailsPage() {
                       <p>{order.paymentMethod}</p>
                     </div>
                   )}
+                </div>
+
+                {/* WhatsApp Order Inquiry */}
+                <div className="pt-4 border-t">
+                  <WhatsAppButton
+                    href={generateOrderInquiryLink(order.orderNumber)}
+                    size="sm"
+                    className="w-full"
+                  >
+                    Ask about this order
+                  </WhatsAppButton>
                 </div>
               </div>
             </div>
