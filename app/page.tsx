@@ -177,54 +177,74 @@ export default async function HomePage() {
             <FadeInView>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between mb-5 sm:mb-7">
-                <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold">Shop by Category</h2>
-                <Link href="/products" className="text-xs sm:text-sm text-primary font-medium hover:underline">
-                  View all
+                <div>
+                  <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold">Shop by Category</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                    {categories.length} categories available
+                  </p>
+                </div>
+                <Link href="/products" className="text-xs sm:text-sm text-primary font-medium hover:underline flex items-center gap-1">
+                  See All
+                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </Link>
               </div>
 
-              {/* Horizontal scroll on mobile, grid on desktop */}
-              <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-3 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scrollbar-hide sm:grid sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 sm:overflow-visible">
-                {/* "All" category */}
-                <Link
-                  href="/products"
-                  className="snap-start flex-shrink-0 w-[130px] sm:w-auto group relative bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
-                >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/15 flex items-center justify-center mb-2.5">
-                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-xs sm:text-sm text-primary">All Products</h3>
-                  <p className="text-[10px] sm:text-xs text-primary/70 mt-0.5">Browse everything</p>
-                </Link>
+              {/* Scrollable category strip */}
+              <div className="relative">
+                <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scrollbar-hide">
+                  {/* "All Products" pill */}
+                  <Link
+                    href="/products"
+                    className="snap-start flex-shrink-0 flex items-center gap-2.5 pl-2 pr-4 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 transition-opacity"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-medium whitespace-nowrap">All Products</span>
+                  </Link>
 
-                {categories.map((category, i) => {
-                  // Rotating colors for category cards
-                  const colors = [
-                    'from-rose-50 to-rose-100/50 border-rose-200/60 dark:from-rose-900/10 dark:to-rose-900/5 dark:border-rose-800/30',
-                    'from-blue-50 to-blue-100/50 border-blue-200/60 dark:from-blue-900/10 dark:to-blue-900/5 dark:border-blue-800/30',
-                    'from-amber-50 to-amber-100/50 border-amber-200/60 dark:from-amber-900/10 dark:to-amber-900/5 dark:border-amber-800/30',
-                    'from-emerald-50 to-emerald-100/50 border-emerald-200/60 dark:from-emerald-900/10 dark:to-emerald-900/5 dark:border-emerald-800/30',
-                    'from-purple-50 to-purple-100/50 border-purple-200/60 dark:from-purple-900/10 dark:to-purple-900/5 dark:border-purple-800/30',
-                    'from-cyan-50 to-cyan-100/50 border-cyan-200/60 dark:from-cyan-900/10 dark:to-cyan-900/5 dark:border-cyan-800/30',
-                  ]
-                  const color = colors[i % colors.length]
+                  {categories.slice(0, 12).map((category, i) => {
+                    const colors = [
+                      'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300',
+                      'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
+                      'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300',
+                      'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300',
+                      'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
+                      'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-300',
+                      'bg-pink-50 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300',
+                      'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300',
+                      'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300',
+                      'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-300',
+                      'bg-lime-50 text-lime-700 dark:bg-lime-900/20 dark:text-lime-300',
+                      'bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/20 dark:text-fuchsia-300',
+                    ]
+                    const color = colors[i % colors.length]
 
-                  return (
+                    return (
+                      <Link
+                        key={category.id}
+                        href={`/products?category=${category.id}`}
+                        className={`snap-start flex-shrink-0 flex items-center gap-2 px-4 py-2.5 ${color} rounded-full hover:shadow-md hover:scale-[1.02] transition-all duration-200 border border-transparent hover:border-current/10`}
+                      >
+                        <span className="text-sm font-medium whitespace-nowrap">{category.name}</span>
+                      </Link>
+                    )
+                  })}
+
+                  {/* "More" pill if there are more than 12 categories */}
+                  {categories.length > 12 && (
                     <Link
-                      key={category.id}
-                      href={`/products?category=${category.id}`}
-                      className={`snap-start flex-shrink-0 w-[130px] sm:w-auto group relative bg-gradient-to-br ${color} border rounded-2xl p-4 sm:p-5 hover:shadow-lg hover:scale-[1.02] transition-all duration-300`}
+                      href="/products"
+                      className="snap-start flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-muted text-muted-foreground rounded-full hover:bg-muted/80 transition-colors border border-border"
                     >
-                      <h3 className="font-semibold text-xs sm:text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                        {category.name}
-                      </h3>
-                      {category.description && (
-                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 line-clamp-2">{category.description}</p>
-                      )}
-                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all mt-2" />
+                      <span className="text-sm font-medium whitespace-nowrap">+{categories.length - 12} more</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
-                  )
-                })}
+                  )}
+                </div>
+
+                {/* Fade edges on desktop to hint at scrollability */}
+                <div className="hidden sm:block absolute top-0 right-0 bottom-2 w-16 bg-gradient-to-l from-background to-transparent pointer-events-none" />
               </div>
             </div>
             </FadeInView>
