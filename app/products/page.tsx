@@ -81,7 +81,8 @@ function ProductsContent() {
   }, [selectedCategory, debouncedSearch])
 
   const loadData = useCallback(async () => {
-    setLoading(true)
+    // Only show loading skeleton on initial load, not on filter changes
+    if (products.length === 0) setLoading(true)
     try {
       const [productsResult, categoriesResult] = await Promise.all([
         getProducts({

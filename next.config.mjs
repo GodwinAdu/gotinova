@@ -4,6 +4,9 @@ const nextConfig = {
   typescript: {
     tsconfigPath: './tsconfig.json',
   },
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'recharts', '@radix-ui/react-slot'],
+  },
   images: {
     remotePatterns: [
       {
@@ -35,6 +38,24 @@ const nextConfig = {
         {
           key: 'X-XSS-Protection',
           value: '1; mode=block',
+        },
+      ],
+    },
+    {
+      source: '/api/:path*',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'no-store, max-age=0',
+        },
+      ],
+    },
+    {
+      source: '/_next/static/:path*',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, max-age=31536000, immutable',
         },
       ],
     },

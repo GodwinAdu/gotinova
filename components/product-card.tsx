@@ -4,11 +4,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Heart, ShoppingCart, Star, Check, Eye } from 'lucide-react'
-import { useState } from 'react'
+import { useState, memo, lazy, Suspense } from 'react'
 import { useCartStore } from '@/lib/store'
 import { formatPrice } from '@/lib/utils/format'
 import { hapticFeedback } from '@/lib/utils/haptic'
-import { ProductQuickView } from './product-quick-view'
+
+// Lazy load the quick view modal — only needed when clicked
+const ProductQuickView = lazy(() => import('./product-quick-view').then(m => ({ default: m.ProductQuickView })))
 
 interface ProductCardProps {
   id: string
@@ -22,7 +24,7 @@ interface ProductCardProps {
   stock?: number
 }
 
-export function ProductCard({
+export const ProductCard = memo(function ProductCard({
   id,
   name,
   price,
@@ -89,18 +91,20 @@ export function ProductCard({
         {/* Action buttons on hover */}
         <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
           {/* Quick View */}
-          <ProductQuickView
-            product={{ id, name, price, originalPrice, image, rating, reviewCount, description, stock }}
-            trigger={
-              <button
-                className="p-2 bg-white/90 dark:bg-card/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all"
-                title="Quick View"
-                onClick={(e) => e.preventDefault()}
-              >
-                <Eye className="w-3.5 h-3.5 text-muted-foreground" />
-              </button>
-            }
-          />
+          <Suspense fallback={null}>
+            <ProductQuickView
+              product={{ id, name, price, originalPrice, image, rating, reviewCount, description, stock }}
+              trigger={
+                <button
+                  className="p-2 bg-white/90 dark:bg-card/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all"
+                  title="Quick View"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <Eye className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
+              }
+            />
+          </Suspense>
           {/* Wishlist */}
           <button
             className="p-2 bg-white/90 dark:bg-card/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all"
@@ -123,12 +127,12 @@ export function ProductCard({
 
         {/* Rating */}
         <div className="flex items-center gap-1">
-          <div className="flex gap-px">
-            {[...Array(5)].map((_, i) => (
+          <div className="flex gap-px" aria-label={`Rating: ${numRating} out of 5`}>
+            {[1, 2, 3, 4, 5].map((i) => (
               <Star
                 key={i}
                 className={`w-3 h-3 ${
-                  i < Math.round(numRating)
+                  i <= Math.round(numRating)
                     ? 'fill-amber-400 text-amber-400'
                     : 'text-border'
                 }`}
@@ -175,4 +179,4 @@ export function ProductCard({
       </div>
     </div>
   )
-}
+})

@@ -2,15 +2,18 @@ import { headers } from 'next/headers'
 import { auth } from '@/lib/auth'
 import { Header } from '@/components/header'
 import { ProductCard } from '@/components/product-card'
-import { RecentlyViewed } from '@/components/recently-viewed'
 import { FadeInView } from '@/components/page-transition'
-import { FlashSale } from '@/components/flash-sale'
-import { InstagramFeed } from '@/components/instagram-feed'
-import { Testimonials } from '@/components/testimonials'
 import { getProducts, getCategories } from '@/app/actions/products'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Truck, Shield, Headphones, Sparkles } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+// Lazy-load below-the-fold components
+const RecentlyViewed = dynamic(() => import('@/components/recently-viewed').then(m => ({ default: m.RecentlyViewed })), { ssr: false })
+const FlashSale = dynamic(() => import('@/components/flash-sale').then(m => ({ default: m.FlashSale })))
+const InstagramFeed = dynamic(() => import('@/components/instagram-feed').then(m => ({ default: m.InstagramFeed })), { ssr: false })
+const Testimonials = dynamic(() => import('@/components/testimonials').then(m => ({ default: m.Testimonials })), { ssr: false })
 
 export const metadata = {
   title: 'GotiNova - Premium Hair & Beauty Store',
@@ -18,9 +21,12 @@ export const metadata = {
 }
 
 export default async function HomePage() {
-  const session = await auth.api.getSession({ headers: await headers() })
-  const productsResult = await getProducts({ limit: 10 })
-  const categoriesResult = await getCategories()
+  // Parallel data fetching for faster page load
+  const [session, productsResult, categoriesResult] = await Promise.all([
+    auth.api.getSession({ headers: await headers() }),
+    getProducts({ limit: 10 }),
+    getCategories(),
+  ])
 
   const products = productsResult.success ? productsResult.data || [] : []
   const categories = categoriesResult.success ? categoriesResult.data || [] : []

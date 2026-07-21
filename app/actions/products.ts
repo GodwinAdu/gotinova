@@ -3,10 +3,21 @@
 import { db } from '@/lib/db'
 import { products, categories, productAttributes } from '@/lib/db/schema'
 import { eq, like, and, gte, lte } from 'drizzle-orm'
+import { unstable_cache } from 'next/cache'
+
+// Internal cached function for categories
+const getCategoriesCached = unstable_cache(
+  async () => {
+    const result = await db.select().from(categories)
+    return result
+  },
+  ['categories-list'],
+  { revalidate: 300 } // 5 minutes
+)
 
 export async function getCategories() {
   try {
-    const result = await db.select().from(categories)
+    const result = await getCategoriesCached()
     return { success: true, data: result }
   } catch (error) {
     console.error('Error fetching categories:', error)
