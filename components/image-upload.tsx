@@ -12,6 +12,15 @@ export interface UploadedImage {
   name: string
 }
 
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
 interface ImageUploadProps {
   value: UploadedImage[]
   onChange: (images: UploadedImage[]) => void
@@ -69,24 +78,17 @@ export function ImageUpload({
               }
             }
           } catch {
-            // Fallback to local preview
+            // Fallback to base64
           }
 
-          // Fallback: create object URL for local preview
-          const localUrl = URL.createObjectURL(file)
-          newImages.push({ id, url: localUrl, name: file.name })
+          // Fallback: convert to base64 data URL (stored in DB)
+          const dataUrl = await fileToBase64(file)
+          newImages.push({ id, url: dataUrl, name: file.name })
         }
 
         onChange([...value, ...newImages])
       } catch (err) {
-        setError('Upload failed. Images saved as local previews.')
-        // Add as local previews anyway
-        const localImages = acceptedFiles.map(file => ({
-          id: `img-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          url: URL.createObjectURL(file),
-          name: file.name,
-        }))
-        onChange([...value, ...localImages])
+        setError('Upload failed. Please try again.')
       } finally {
         setUploading(false)
       }
