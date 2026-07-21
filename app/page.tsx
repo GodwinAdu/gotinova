@@ -3,9 +3,9 @@ import { auth } from '@/lib/auth'
 import { Header } from '@/components/header'
 import { ProductCard } from '@/components/product-card'
 import { FadeInView } from '@/components/page-transition'
+import { HeroCarousel } from '@/components/hero-carousel'
 import { getProducts, getCategories } from '@/app/actions/products'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Truck, Shield, Headphones, Sparkles } from 'lucide-react'
 import dynamic from 'next/dynamic'
@@ -90,35 +90,9 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              {/* Hero Image */}
+              {/* Hero Image Carousel */}
               <div className="order-1 lg:order-2 relative">
-                <div className="relative aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/5] max-w-md mx-auto lg:max-w-none rounded-3xl overflow-hidden shadow-2xl shadow-primary/10">
-                  <Image
-                    src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80&auto=format&fit=crop"
-                    alt="Beautiful woman with premium hair styling - GotiNova"
-                    fill
-                    className="object-cover"
-                    priority
-                    sizes="(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 500px"
-                  />
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-
-                  {/* Floating badge */}
-                  <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
-                    <div className="bg-white/90 dark:bg-card/90 backdrop-blur-md rounded-2xl p-3 sm:p-4 shadow-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <Sparkles className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-xs sm:text-sm font-semibold text-foreground">New Arrivals Weekly</p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground">Fresh styles just dropped</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <HeroCarousel />
 
                 {/* Decorative dots */}
                 <div className="hidden lg:block absolute -bottom-4 -left-4 w-24 h-24 bg-primary/5 rounded-2xl -z-10" />
