@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { createReview, getProductReviews, updateReview, deleteReview } from '@/app/actions/reviews'
 import { useSession } from '@/lib/auth-client'
 import { formatDate } from '@/lib/utils/format'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 
 interface Review {
   id: string
@@ -255,6 +256,7 @@ function ReviewForm({ productId, onSuccess }: { productId: string; onSuccess: ()
 // Single review display
 function ReviewCard({ review, currentUserId, onUpdated }: { review: Review; currentUserId?: string; onUpdated: () => void }) {
   const [showMenu, setShowMenu] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [editRating, setEditRating] = useState(review.rating)
@@ -270,13 +272,13 @@ function ReviewCard({ review, currentUserId, onUpdated }: { review: Review; curr
   })() : []
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this review?')) return
     setDeleting(true)
     const result = await deleteReview(review.id)
     if (result.success) {
       onUpdated()
     }
     setDeleting(false)
+    setShowDeleteDialog(false)
     setShowMenu(false)
   }
 
@@ -389,11 +391,10 @@ function ReviewCard({ review, currentUserId, onUpdated }: { review: Review; curr
                     Edit Review
                   </button>
                   <button
-                    onClick={handleDelete}
-                    disabled={deleting}
+                    onClick={() => { setShowDeleteDialog(true); setShowMenu(false) }}
                     className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
                   >
-                    {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                    <Trash2 className="w-3.5 h-3.5" />
                     Delete
                   </button>
                 </div>
@@ -421,6 +422,18 @@ function ReviewCard({ review, currentUserId, onUpdated }: { review: Review; curr
           ))}
         </div>
       )}
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+        title="Delete Review"
+        description="Are you sure you want to delete this review? This action cannot be undone."
+        confirmLabel="Delete Review"
+        variant="danger"
+        loading={deleting}
+      />
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { getActivityLog, clearActivityLog, type ActivityEntry } from '@/lib/activity-log'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 
 const ACTION_ICONS: Record<string, typeof Package> = {
   product: Package,
@@ -37,6 +38,7 @@ function formatTimeAgo(timestamp: string): string {
 export default function AdminActivityPage() {
   const [entries, setEntries] = useState<ActivityEntry[]>([])
   const [mounted, setMounted] = useState(false)
+  const [showClearDialog, setShowClearDialog] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -44,10 +46,9 @@ export default function AdminActivityPage() {
   }, [])
 
   const handleClear = () => {
-    if (confirm('Clear all activity history?')) {
-      clearActivityLog()
-      setEntries([])
-    }
+    clearActivityLog()
+    setEntries([])
+    setShowClearDialog(false)
   }
 
   if (!mounted) return null
@@ -65,7 +66,7 @@ export default function AdminActivityPage() {
             Refresh
           </Button>
           {entries.length > 0 && (
-            <Button onClick={handleClear} variant="outline" size="sm" className="rounded-xl gap-1 text-destructive hover:text-destructive">
+            <Button onClick={() => setShowClearDialog(true)} variant="outline" size="sm" className="rounded-xl gap-1 text-destructive hover:text-destructive">
               <Trash2 className="w-3.5 h-3.5" />
               Clear
             </Button>
@@ -112,6 +113,17 @@ export default function AdminActivityPage() {
           </div>
         </Card>
       )}
+
+      {/* Clear confirmation dialog */}
+      <ConfirmDialog
+        open={showClearDialog}
+        onConfirm={handleClear}
+        onCancel={() => setShowClearDialog(false)}
+        title="Clear Activity Log"
+        description="Are you sure you want to clear all activity history? This action cannot be undone."
+        confirmLabel="Clear All"
+        variant="warning"
+      />
     </div>
   )
 }

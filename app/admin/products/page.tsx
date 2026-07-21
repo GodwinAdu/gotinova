@@ -10,6 +10,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getAllProducts, deleteProduct } from '@/app/actions/admin'
 import { exportProductsCSV } from '@/lib/utils/export-csv'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 
 interface Product {
   id: string
@@ -26,6 +27,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -46,8 +48,6 @@ export default function AdminProductsPage() {
   }, [])
 
   const handleDelete = async (productId: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return
-
     try {
       setDeleting(productId)
       await deleteProduct(productId)
@@ -57,9 +57,9 @@ export default function AdminProductsPage() {
       logActivity({ action: 'Deleted product', resource: 'product', resourceId: productId })
     } catch (err) {
       console.error('[v0] Delete error:', err)
-      alert(err instanceof Error ? err.message : 'Failed to delete product')
     } finally {
       setDeleting(null)
+      setDeleteTarget(null)
     }
   }
 
@@ -176,7 +176,7 @@ export default function AdminProductsPage() {
                           </Button>
                         </Link>
                         <Button
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => setDeleteTarget(product.id)}
                           disabled={deleting === product.id}
                           variant="ghost"
                           size="sm"
@@ -198,6 +198,18 @@ export default function AdminProductsPage() {
           </div>
         </Card>
       )}
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
+        onCancel={() => setDeleteTarget(null)}
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This will remove it from your store and cannot be undone."
+        confirmLabel="Delete Product"
+        variant="danger"
+        loading={!!deleting}
+      />
     </div>
   )
 }

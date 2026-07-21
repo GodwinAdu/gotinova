@@ -5,6 +5,7 @@ import { Star, Check, X, Trash2, Loader2, MessageSquare, Eye } from 'lucide-reac
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { getAdminReviews, adminUpdateReviewStatus, adminDeleteReview } from '@/app/actions/admin-reviews'
 
 interface AdminReview {
@@ -28,6 +29,7 @@ export default function AdminReviewsPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   useEffect(() => {
     loadReviews()
@@ -52,13 +54,13 @@ export default function AdminReviewsPage() {
   }
 
   const handleDelete = async (reviewId: string) => {
-    if (!confirm('Are you sure you want to permanently delete this review?')) return
     setActionLoading(reviewId)
     const result = await adminDeleteReview(reviewId)
     if (result.success) {
       loadReviews()
     }
     setActionLoading(null)
+    setDeleteTarget(null)
   }
 
   const pendingCount = reviews.filter(r => r.status === 'pending').length
@@ -190,7 +192,7 @@ export default function AdminReviewsPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleDelete(review.id)}
+                    onClick={() => setDeleteTarget(review.id)}
                     disabled={actionLoading === review.id}
                     className="rounded-lg h-8 px-2.5 text-destructive hover:bg-destructive/10"
                     title="Delete permanently"
@@ -203,6 +205,18 @@ export default function AdminReviewsPage() {
           ))}
         </div>
       )}
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
+        onCancel={() => setDeleteTarget(null)}
+        title="Delete Review"
+        description="Are you sure you want to permanently delete this review? This cannot be undone."
+        confirmLabel="Delete Permanently"
+        variant="danger"
+        loading={!!actionLoading}
+      />
     </div>
   )
 }
