@@ -7,6 +7,7 @@ import { Heart, ShoppingCart, Star, Check, Eye } from 'lucide-react'
 import { useState } from 'react'
 import { useCartStore } from '@/lib/store'
 import { formatPrice } from '@/lib/utils/format'
+import { hapticFeedback } from '@/lib/utils/haptic'
 import { ProductQuickView } from './product-quick-view'
 
 interface ProductCardProps {
@@ -41,6 +42,7 @@ export function ProductCard({
   const numRating = Number(rating || 0)
 
   const handleAddToCart = () => {
+    hapticFeedback('light')
     addItem({
       productId: id,
       name,

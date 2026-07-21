@@ -12,6 +12,7 @@ import { useSession } from '@/lib/auth-client'
 import { formatPrice } from '@/lib/utils/format'
 import { CartItemSkeleton } from '@/components/skeletons'
 import { BundleDealBadge, calculateBundleSavings, getBundleDiscount } from '@/components/bundle-deal'
+import { SwipeToDelete } from '@/components/swipe-to-delete'
 
 export default function CartPage() {
   const router = useRouter()
@@ -90,8 +91,8 @@ export default function CartPage() {
                   {items.length} item{items.length > 1 ? 's' : ''} in cart
                 </p>
                 {items.map((item) => (
+                  <SwipeToDelete key={item.productId} onDelete={() => removeItem(item.productId)}>
                   <div
-                    key={item.productId}
                     className="flex gap-3 sm:gap-4 p-3 sm:p-4 bg-card border border-border/60 rounded-2xl"
                   >
                     {/* Image */}
@@ -158,6 +159,7 @@ export default function CartPage() {
                       </div>
                     </div>
                   </div>
+                  </SwipeToDelete>
                 ))}
               </div>
 

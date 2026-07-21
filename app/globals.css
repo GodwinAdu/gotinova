@@ -221,3 +221,10 @@
     background: oklch(0.65 0.02 280);
   }
 }
+
+/* Shimmer animation for image placeholders */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
