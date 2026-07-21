@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from '@/lib/auth-client'
-import { LayoutDashboard, Package, ShoppingCart, Users, BarChart3, LogOut, Menu, X, Settings, Gift, ClipboardList, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Users, BarChart3, LogOut, Menu, X, Settings, Gift, ClipboardList, MessageSquare, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import { ToastProvider } from '@/components/toast'
@@ -62,6 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { label: 'Customers', href: '/admin/customers', icon: Users },
     { label: 'Reviews', href: '/admin/reviews', icon: MessageSquare },
+    { label: 'Email Campaigns', href: '/admin/email', icon: Mail },
     { label: 'Gift Cards', href: '/admin/gift-cards', icon: Gift },
     { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
     { label: 'Activity Log', href: '/admin/activity', icon: ClipboardList },

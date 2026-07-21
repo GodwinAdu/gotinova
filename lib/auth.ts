@@ -60,6 +60,24 @@ const authConfig = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     },
   },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user: any) => {
+          // Send welcome email on signup
+          try {
+            const { sendWelcomeEmail } = await import('@/lib/email')
+            await sendWelcomeEmail({
+              email: user.email,
+              name: user.name || '',
+            })
+          } catch (error) {
+            console.error('[Auth] Welcome email failed:', error)
+          }
+        },
+      },
+    },
+  },
   advanced: {
     defaultCookieAttributes: {
       sameSite: process.env.NODE_ENV === 'development' ? 'none' as const : ('lax' as const),
