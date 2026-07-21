@@ -18,6 +18,7 @@ import { ImageZoom } from '@/components/image-zoom'
 import { SizeGuideButton } from '@/components/size-guide'
 import { NotifyBackInStock } from '@/components/notify-back-in-stock'
 import { BundleDealsInfo } from '@/components/bundle-deal'
+import { TrustBadges } from '@/components/trust-badges'
 import { ProductStructuredData } from '@/components/product-structured-data'
 import Link from 'next/link'
 
@@ -378,6 +379,9 @@ export default function ProductDetail() {
                   <NotifyBackInStock productId={product.id} productName={product.name} />
                 </div>
               )}
+
+              {/* Trust Badges */}
+              <TrustBadges />
             </div>
           </div>
         </div>

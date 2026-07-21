@@ -77,6 +77,13 @@ export function ProductCard({
           </div>
         )}
 
+        {/* Stock urgency */}
+        {stock !== undefined && stock > 0 && stock <= 5 && (
+          <div className="absolute bottom-2.5 left-2.5 bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold shadow-sm animate-pulse">
+            🔥 Only {stock} left!
+          </div>
+        )}
+
         {/* Action buttons on hover */}
         <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
           {/* Quick View */}

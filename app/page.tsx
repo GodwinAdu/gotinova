@@ -6,6 +6,7 @@ import { RecentlyViewed } from '@/components/recently-viewed'
 import { FadeInView } from '@/components/page-transition'
 import { FlashSale } from '@/components/flash-sale'
 import { InstagramFeed } from '@/components/instagram-feed'
+import { Testimonials } from '@/components/testimonials'
 import { getProducts, getCategories } from '@/app/actions/products'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -239,6 +240,9 @@ export default async function HomePage() {
           </div>
           </FadeInView>
         </section>
+
+        {/* Customer Testimonials */}
+        <Testimonials />
 
         {/* Instagram Feed */}
         <InstagramFeed />
