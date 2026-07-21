@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Star, Camera, X, Loader2, CheckCircle, MessageSquare } from 'lucide-react'
+import { Star, Camera, X, Loader2, CheckCircle, MessageSquare, Pencil, Trash2, MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
-import { createReview, getProductReviews } from '@/app/actions/reviews'
+import { createReview, getProductReviews, updateReview, deleteReview } from '@/app/actions/reviews'
 import { useSession } from '@/lib/auth-client'
 import { formatDate } from '@/lib/utils/format'
 
@@ -253,10 +253,92 @@ function ReviewForm({ productId, onSuccess }: { productId: string; onSuccess: ()
 }
 
 // Single review display
-function ReviewCard({ review }: { review: Review }) {
+function ReviewCard({ review, currentUserId, onUpdated }: { review: Review; currentUserId?: string; onUpdated: () => void }) {
+  const [showMenu, setShowMenu] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [editRating, setEditRating] = useState(review.rating)
+  const [editTitle, setEditTitle] = useState(review.title || '')
+  const [editComment, setEditComment] = useState(review.comment || '')
+  const [editLoading, setEditLoading] = useState(false)
+  const [editError, setEditError] = useState('')
+
+  const isOwner = currentUserId && review.userId === currentUserId
+
   const parsedImages: string[] = review.images ? (() => {
     try { return JSON.parse(review.images!) } catch { return [] }
   })() : []
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this review?')) return
+    setDeleting(true)
+    const result = await deleteReview(review.id)
+    if (result.success) {
+      onUpdated()
+    }
+    setDeleting(false)
+    setShowMenu(false)
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setEditError('')
+    if (editRating === 0) { setEditError('Please select a rating'); return }
+    if (!editComment.trim()) { setEditError('Please write a comment'); return }
+
+    setEditLoading(true)
+    const result = await updateReview(review.id, {
+      rating: editRating,
+      title: editTitle.trim() || undefined,
+      comment: editComment.trim(),
+    })
+    if (result.success) {
+      setEditing(false)
+      onUpdated()
+    } else {
+      setEditError(result.error || 'Failed to update review')
+    }
+    setEditLoading(false)
+  }
+
+  if (editing) {
+    return (
+      <div className="py-4 border-b border-border last:border-0">
+        <Card className="p-4 rounded-xl bg-muted/30">
+          <h4 className="text-sm font-semibold mb-3">Edit Your Review</h4>
+          <form onSubmit={handleEditSubmit} className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium mb-1">Rating</label>
+              <StarRatingInput value={editRating} onChange={setEditRating} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Title</label>
+              <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Review title (optional)" className="h-9 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Comment</label>
+              <textarea
+                value={editComment}
+                onChange={(e) => setEditComment(e.target.value)}
+                className="w-full px-3 py-2 border border-input rounded-xl bg-background text-sm placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring transition-all min-h-[80px] resize-y"
+                required
+              />
+            </div>
+            {editError && <p className="text-xs text-destructive">{editError}</p>}
+            <div className="flex gap-2">
+              <Button type="submit" size="sm" disabled={editLoading} className="rounded-xl">
+                {editLoading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                Save Changes
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setEditing(false)} className="rounded-xl">
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="py-4 border-b border-border last:border-0">
@@ -284,6 +366,41 @@ function ReviewCard({ review }: { review: Review }) {
             </span>
           </div>
         </div>
+
+        {/* Owner actions */}
+        {isOwner && (
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+              aria-label="Review options"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                <div className="absolute right-0 top-full mt-1 z-50 w-36 bg-card border border-border/60 rounded-xl shadow-lg p-1 animate-in fade-in zoom-in-95 duration-150">
+                  <button
+                    onClick={() => { setEditing(true); setShowMenu(false) }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium hover:bg-muted transition-colors"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    Edit Review
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                  >
+                    {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                    Delete
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {review.title && (
@@ -310,6 +427,7 @@ function ReviewCard({ review }: { review: Review }) {
 
 // Main component
 export function ProductReviews({ productId, productName }: ProductReviewsProps) {
+  const { data: session } = useSession()
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -411,7 +529,7 @@ export function ProductReviews({ productId, productName }: ProductReviewsProps) 
       ) : reviews.length > 0 ? (
         <div className="divide-y divide-border">
           {reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
+            <ReviewCard key={review.id} review={review} currentUserId={session?.user?.id} onUpdated={loadReviews} />
           ))}
         </div>
       ) : (

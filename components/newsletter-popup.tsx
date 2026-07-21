@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { X, Mail, Gift, Loader2, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { subscribeToNewsletter } from '@/app/actions/newsletter'
 
 /**
  * Newsletter Popup — appears after 10 seconds on first visit.
@@ -11,7 +12,7 @@ import { Input } from '@/components/ui/input'
  * Also includes a footer-inline version.
  */
 
-const STORAGE_KEY = 'luxehair-newsletter'
+const STORAGE_KEY = 'gotinova-newsletter'
 const POPUP_DELAY = 10000 // 10 seconds
 const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days
 
@@ -34,11 +35,12 @@ function saveState(state: NewsletterState) {
 }
 
 async function subscribeEmail(email: string): Promise<boolean> {
-  // In production, this would call a server action to store in DB or send to Mailchimp/ConvertKit
-  console.log(`[Newsletter] Subscribed: ${email}`)
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 800))
-  return true
+  try {
+    const result = await subscribeToNewsletter(email)
+    return result.success
+  } catch {
+    return false
+  }
 }
 
 // ============ Popup Version ============

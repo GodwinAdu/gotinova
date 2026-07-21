@@ -27,7 +27,7 @@ export function ShareWishlist({ items }: ShareWishlistProps) {
   const generateShareText = (): string => {
     const itemList = items.slice(0, 5).map((i) => `• ${i.name}`).join('\n')
     const more = items.length > 5 ? `\n...and ${items.length - 5} more` : ''
-    return `Check out my LuxeHair wishlist! 💕\n\n${itemList}${more}\n\n${generateShareLink()}`
+    return `Check out my GotiNova wishlist! 💕\n\n${itemList}${more}\n\n${generateShareLink()}`
   }
 
   const handleCopyLink = async () => {
@@ -52,7 +52,7 @@ export function ShareWishlist({ items }: ShareWishlistProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'My LuxeHair Wishlist',
+          title: 'My GotiNova Wishlist',
           text: generateShareText(),
           url: generateShareLink(),
         })
