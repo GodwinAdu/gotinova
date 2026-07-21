@@ -15,7 +15,7 @@ export interface CompareProduct {
   description?: string | null
 }
 
-const STORAGE_KEY = 'luxehair-compare'
+const STORAGE_KEY = 'gotinova-compare'
 const MAX_ITEMS = 3
 
 export function getCompareList(): CompareProduct[] {

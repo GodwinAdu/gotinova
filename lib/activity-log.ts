@@ -17,7 +17,7 @@ export interface ActivityEntry {
   timestamp: string
 }
 
-const STORAGE_KEY = 'luxehair-activity-log'
+const STORAGE_KEY = 'gotinova-activity-log'
 const MAX_ENTRIES = 100
 
 function getLog(): ActivityEntry[] {

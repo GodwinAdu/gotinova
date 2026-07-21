@@ -57,11 +57,11 @@ export interface StoreSettings {
 }
 
 const DEFAULT_SETTINGS: StoreSettings = {
-  storeName: 'LuxeHair',
-  storeEmail: 'support@luxehair.com',
-  storePhone: '+233 20 123 4567',
-  whatsappNumber: '233201234567',
-  storeAddress: 'Accra, Ghana',
+  storeName: 'GotiNova',
+  storeEmail: 'achaempomaatina352@gmail.com',
+  storePhone: '+233 24 959 5624',
+  whatsappNumber: '233249595624',
+  storeAddress: 'Kumasi, Ghana',
   taxRate: 12.5,
   shippingCost: 50,
   freeShippingThreshold: 1000,

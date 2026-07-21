@@ -79,10 +79,18 @@ function ReviewForm({ productId, onSuccess }: { productId: string; onSuccess: ()
       return
     }
 
-    // Create local preview URLs
+    // Convert to base64 data URLs (stored directly in DB)
     Array.from(files).forEach((file) => {
-      const url = URL.createObjectURL(file)
-      setImages((prev) => [...prev, url])
+      if (file.size > 2 * 1024 * 1024) {
+        setError('Each image must be under 2MB')
+        return
+      }
+      const reader = new FileReader()
+      reader.onload = () => {
+        const dataUrl = reader.result as string
+        setImages((prev) => [...prev, dataUrl])
+      }
+      reader.readAsDataURL(file)
     })
   }
 

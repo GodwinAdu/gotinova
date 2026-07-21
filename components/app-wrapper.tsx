@@ -20,7 +20,7 @@ export function AppWrapper({ children }: AppWrapperProps) {
       <MobileNav />
       <CompareBar />
       <AbandonedCartReminder />
-      <WhatsAppFloat message="Hi LuxeHair! 👋 I have a question about your products." />
+      <WhatsAppFloat message="Hi GotiNova! 👋 I have a question about your products." />
       <LiveChat />
       <NewsletterPopup />
       <SocialProofPopup />

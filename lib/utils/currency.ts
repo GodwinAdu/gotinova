@@ -37,8 +37,8 @@ const FALLBACK_RATES: Record<CurrencyCode, number> = {
   NGN: 105,
 }
 
-const STORAGE_KEY = 'luxehair-currency'
-const RATES_CACHE_KEY = 'luxehair-exchange-rates'
+const STORAGE_KEY = 'gotinova-currency'
+const RATES_CACHE_KEY = 'gotinova-exchange-rates'
 const CACHE_DURATION = 6 * 60 * 60 * 1000 // 6 hours
 
 interface CachedRates {

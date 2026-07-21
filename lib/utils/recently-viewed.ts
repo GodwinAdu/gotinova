@@ -13,7 +13,7 @@ export interface RecentProduct {
   viewedAt: number
 }
 
-const STORAGE_KEY = 'luxehair-recently-viewed'
+const STORAGE_KEY = 'gotinova-recently-viewed'
 const MAX_ITEMS = 12
 
 export function getRecentlyViewed(): RecentProduct[] {

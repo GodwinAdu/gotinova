@@ -65,7 +65,7 @@ export const useCartStore = create<CartStore>()(
       },
     }),
     {
-      name: 'luxehair-cart',
+      name: 'gotinova-cart',
     }
   )
 )
@@ -108,7 +108,7 @@ export const useWishlistStore = create<WishlistStore>()(
       clearWishlist: () => set({ items: [] }),
     }),
     {
-      name: 'luxehair-wishlist',
+      name: 'gotinova-wishlist',
     }
   )
 )

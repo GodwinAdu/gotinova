@@ -62,7 +62,7 @@ export function exportOrdersCSV(orders: any[]): void {
       { header: 'Payment Status', accessor: (o) => o.paymentStatus || 'pending' },
       { header: 'Payment Method', accessor: (o) => o.paymentMethod || '' },
     ],
-    'luxehair-orders'
+    'gotinova-orders'
   )
 }
 
@@ -79,7 +79,7 @@ export function exportCustomersCSV(customers: any[]): void {
       { header: 'Total Spent (GHS)', accessor: (c) => parseFloat(c.totalSpent || '0').toFixed(2) },
       { header: 'Joined', accessor: (c) => c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '' },
     ],
-    'luxehair-customers'
+    'gotinova-customers'
   )
 }
 
@@ -97,6 +97,6 @@ export function exportProductsCSV(products: any[]): void {
       { header: 'Active', accessor: (p) => p.isActive ? 'Yes' : 'No' },
       { header: 'Category ID', accessor: (p) => p.categoryId || '' },
     ],
-    'luxehair-products'
+    'gotinova-products'
   )
 }
