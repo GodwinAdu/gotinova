@@ -32,18 +32,13 @@ export default async function AboutPage() {
           <div className="container max-w-4xl mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8">Our Story</h2>
             <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-              GotiNova was founded with a simple mission: to provide premium quality hairpieces that
-              enhance confidence and self-expression. We believe that everyone deserves to feel
-              beautiful and confident, regardless of their hair journey.
+              GotiNova was founded by Godwin and Tina with a simple vision: to create a trusted brand that brings quality, affordability, and exceptional customer service together.
             </p>
             <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-              Our carefully curated collection features authentic, high-quality wigs and hair
-              extensions sourced from trusted suppliers worldwide. Each product is inspected to
-              ensure it meets our rigorous quality standards before reaching our customers.
+              Every product we offer is chosen with care to help our customers shop confidently and enjoy a seamless experience. From premium hair and beauty products to fashion and lifestyle essentials, we curate only the best.
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Whether you&apos;re looking for a everyday style, a glamorous transformation, or
-              medical solutions, GotiNova has the perfect solution for you.
+              At GotiNova, we&apos;re committed to building lasting relationships through trust, innovation, and value. Whether you&apos;re shopping for yourself or a loved one, we&apos;re here to make every experience exceptional.
             </p>
           </div>
         </section>
