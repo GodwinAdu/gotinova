@@ -18,8 +18,8 @@ interface Coupon {
   maxUses: number | null
   currentUses: number | null
   minOrderAmount: string | null
-  validFrom: string | null
-  validTo: string | null
+  validFrom: Date | null
+  validTo: Date | null
   isActive: boolean | null
 }
 
@@ -262,8 +262,8 @@ export default function AdminCouponsPage() {
       {/* Delete confirmation */}
       <ConfirmDialog
         open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => { if (deleteTarget) handleDelete(deleteTarget) }}
         title="Delete Coupon"
         description="This coupon will be permanently deleted. This action cannot be undone."
       />
