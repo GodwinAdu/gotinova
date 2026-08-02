@@ -4,7 +4,7 @@
 
 // App Info
 export const APP_NAME = 'GotiNova'
-export const APP_DESCRIPTION = 'Premium Hair & Beauty Store - Authentic, High-Quality Hairpieces'
+export const APP_DESCRIPTION = 'Your One-Stop Online Store — Premium Products Across All Categories'
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 // Store Contact (WhatsApp)

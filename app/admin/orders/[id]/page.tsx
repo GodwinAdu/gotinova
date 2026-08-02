@@ -59,6 +59,8 @@ interface ShippingAddress {
   city?: string
   region?: string
   country?: string
+  lat?: number
+  lng?: number
 }
 
 const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as const
@@ -398,6 +400,19 @@ export default function AdminOrderDetailPage() {
                 {shippingAddress.city && <p>{shippingAddress.city}</p>}
                 {shippingAddress.region && <p>{shippingAddress.region}</p>}
                 {shippingAddress.country && <p>{shippingAddress.country}</p>}
+
+                {/* Google Maps link for delivery tracking */}
+                {shippingAddress.lat && shippingAddress.lng && (
+                  <a
+                    href={`https://www.google.com/maps?q=${shippingAddress.lat},${shippingAddress.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-3 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    View on Google Maps
+                  </a>
+                )}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">No shipping address available</p>

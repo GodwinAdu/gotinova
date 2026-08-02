@@ -76,6 +76,10 @@ export default function CheckoutPage() {
     paymentMethod: 'cod',
   })
 
+  // Geolocation state
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [locationLoading, setLocationLoading] = useState(false)
+
   useEffect(() => {
     setMounted(true)
     // Load pricing config from admin settings
@@ -86,6 +90,19 @@ export default function CheckoutPage() {
       }).catch(() => {})
       getTaxRate().then((rate) => setTaxRate(rate)).catch(() => {})
     }).catch(() => {})
+
+    // Auto-detect geolocation
+    if (navigator.geolocation) {
+      setLocationLoading(true)
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({ lat: position.coords.latitude, lng: position.coords.longitude })
+          setLocationLoading(false)
+        },
+        () => setLocationLoading(false),
+        { enableHighAccuracy: true, timeout: 10000 }
+      )
+    }
   }, [])
 
   useEffect(() => {
@@ -148,6 +165,7 @@ export default function CheckoutPage() {
       address: formData.address,
       city: formData.city,
       zipCode: formData.zipCode,
+      ...(location && { lat: location.lat, lng: location.lng }),
     })
 
     // If paying with Paystack, open popup first
@@ -367,6 +385,38 @@ export default function CheckoutPage() {
               {/* Shipping Info */}
               <Card className="p-5 sm:p-6 space-y-4">
                 <h2 className="text-lg font-semibold">Shipping Information</h2>
+
+                {/* Location Detection Status */}
+                <div className="flex items-center gap-2 text-xs">
+                  {locationLoading ? (
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Detecting your location...
+                    </span>
+                  ) : location ? (
+                    <span className="flex items-center gap-1.5 text-emerald-600">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Location detected — delivery tracking enabled
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (navigator.geolocation) {
+                          setLocationLoading(true)
+                          navigator.geolocation.getCurrentPosition(
+                            (pos) => { setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setLocationLoading(false) },
+                            () => setLocationLoading(false),
+                            { enableHighAccuracy: true, timeout: 10000 }
+                          )
+                        }
+                      }}
+                      className="flex items-center gap-1.5 text-primary hover:underline"
+                    >
+                      📍 Enable location for faster delivery
+                    </button>
+                  )}
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>

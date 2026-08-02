@@ -196,7 +196,7 @@ export async function updateOrderStatus(orderId: string, status: string) {
       .set({ status, updatedAt: new Date() })
       .where(eq(orders.id, orderId))
 
-    // Send email notification based on status change
+    // Send email notification for all status changes
     try {
       const order = await db.select({
         orderNumber: orders.orderNumber,
@@ -209,11 +209,13 @@ export async function updateOrderStatus(orderId: string, status: string) {
         const name = shippingInfo.name || 'Customer'
 
         if (email) {
-          const { sendShippingNotification, sendDeliveryConfirmation } = await import('@/lib/email')
+          const { sendShippingNotification, sendDeliveryConfirmation, sendOrderStatusEmail } = await import('@/lib/email')
           if (status === 'shipped') {
             sendShippingNotification({ customerEmail: email, customerName: name, orderNumber: order[0].orderNumber }).catch(() => {})
           } else if (status === 'delivered') {
             sendDeliveryConfirmation({ customerEmail: email, customerName: name, orderNumber: order[0].orderNumber }).catch(() => {})
+          } else {
+            sendOrderStatusEmail({ customerEmail: email, customerName: name, orderNumber: order[0].orderNumber, status }).catch(() => {})
           }
         }
       }

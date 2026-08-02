@@ -366,7 +366,7 @@ export default function ProductDetail() {
 
                   {/* WhatsApp Inquiry */}
                   <a
-                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '233201234567'}?text=${encodeURIComponent(`Hi LuxeHair! 👋\n\nI'm interested in: *${product.name}*\n${typeof window !== 'undefined' ? window.location.href : ''}\n\nCan you tell me more?`)}`}
+                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '233201234567'}?text=${encodeURIComponent(`Hi GotiNova! 👋\n\nI'm interested in: *${product.name}*\n${typeof window !== 'undefined' ? window.location.href : ''}\n\nCan you tell me more?`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20BD5A] text-white text-sm font-medium rounded-xl transition-colors"

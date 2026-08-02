@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'GotiNova - Premium Hair & Beauty Store',
-  description: 'Discover premium quality hair and wigs for every style and need. Shop our curated collection of authentic hairpieces.',
+  title: 'GotiNova - Your One-Stop Online Store',
+  description: 'Shop premium products across categories — hair & beauty, fashion, electronics, health, and more. Quality you can trust, delivered to your doorstep.',
   applicationName: 'GotiNova',
   manifest: '/manifest.json',
   appleWebApp: {

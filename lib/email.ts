@@ -72,7 +72,7 @@ function baseTemplate(content: string): string {
 <div style="max-width:600px;margin:0 auto;padding:20px;">
   <div style="text-align:center;padding:24px 0;border-bottom:1px solid #e5e7eb;">
     <h1 style="margin:0;font-size:24px;color:#1f2937;">${STORE_NAME}</h1>
-    <p style="margin:4px 0 0;font-size:12px;color:#6b7280;">Premium Hair & Beauty Store</p>
+    <p style="margin:4px 0 0;font-size:12px;color:#6b7280;">Your One-Stop Online Store</p>
   </div>
   <div style="padding:32px 0;">
     ${content}
@@ -185,7 +185,7 @@ export async function sendDeliveryConfirmation(data: {
     </div>
 
     <p style="margin:0 0 16px;font-size:14px;color:#6b7280;">
-      We hope you love your new hair! Leave us a review to help other customers.
+      We hope you love your purchase! Leave us a review to help other customers.
     </p>
 
     <div style="text-align:center;padding:16px;background:#f0fdf4;border-radius:12px;">
@@ -255,6 +255,42 @@ export async function sendWelcomeEmail(data: {
 }
 
 // ============ Campaign Email ============
+
+export async function sendOrderStatusEmail(data: {
+  customerEmail: string
+  customerName: string
+  orderNumber: string
+  status: string
+}) {
+  if (!data.customerEmail) return false
+
+  const statusLabels: Record<string, { emoji: string; title: string; message: string }> = {
+    pending: { emoji: '⏳', title: 'Order Received', message: 'Your order has been received and is awaiting confirmation.' },
+    confirmed: { emoji: '✅', title: 'Order Confirmed', message: 'Great news! Your order has been confirmed and is being prepared.' },
+    processing: { emoji: '📦', title: 'Order Processing', message: 'Your order is being prepared and will ship soon.' },
+    cancelled: { emoji: '❌', title: 'Order Cancelled', message: 'Your order has been cancelled. If you have any questions, please contact us.' },
+    returned: { emoji: '↩️', title: 'Order Returned', message: 'Your return has been processed. Refund will be issued shortly.' },
+  }
+
+  const info = statusLabels[data.status] || { emoji: '📋', title: `Status: ${data.status}`, message: `Your order status has been updated to "${data.status}".` }
+
+  const html = baseTemplate(`
+    <h2 style="margin:0 0 8px;font-size:20px;color:#1f2937;">${info.emoji} ${info.title}</h2>
+    <p style="margin:0 0 24px;color:#6b7280;">Hi ${data.customerName},</p>
+    
+    <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:24px;">
+      <p style="margin:0 0 4px;font-size:14px;color:#6b7280;">Order Number</p>
+      <p style="margin:0;font-size:16px;font-weight:bold;color:#1f2937;">${data.orderNumber}</p>
+      <p style="margin:12px 0 0;font-size:14px;color:#6b7280;">${info.message}</p>
+    </div>
+
+    <p style="margin:0;font-size:14px;color:#6b7280;">
+      You can track your order from your account or contact us via WhatsApp if you have questions.
+    </p>
+  `)
+
+  return sendEmail(data.customerEmail, `${info.emoji} ${info.title} — ${data.orderNumber}`, html)
+}
 
 export async function sendCampaignEmail(data: {
   to: string

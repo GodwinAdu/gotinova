@@ -81,7 +81,7 @@ export function generateCustomerNotificationLink(
   const statusMessages: Record<string, string> = {
     processing: `Your order *${orderNumber}* is now being processed! We'll let you know when it ships. 📦`,
     shipped: `Great news! Your order *${orderNumber}* has been shipped! 🚚 You'll receive it soon.`,
-    delivered: `Your order *${orderNumber}* has been delivered! 🎉 We hope you love it. Please leave us a review!`,
+    delivered: `Your order *${orderNumber}* has been delivered! 🎉 We hope you love your purchase. Please leave us a review!`,
   }
 
   const message = `Hi! This is ${APP_NAME}. 🌟\n\n${statusMessages[status] || `Update on your order *${orderNumber}*: Status changed to ${status}.`}\n\nThank you for shopping with us! 💕`
