@@ -23,7 +23,7 @@ export const ourFileRouter = {
     .middleware(auth_middleware)
     .onUploadComplete(async ({ metadata, file }) => {
       console.log('File uploaded by user:', metadata.userId)
-      return { uploadedBy: metadata.userId, url: file.url }
+      return { uploadedBy: metadata.userId, url: file.ufsUrl }
     }),
 
   reviewImage: f({
@@ -32,7 +32,7 @@ export const ourFileRouter = {
     .middleware(auth_middleware)
     .onUploadComplete(async ({ metadata, file }) => {
       console.log('Review image uploaded by user:', metadata.userId)
-      return { uploadedBy: metadata.userId, url: file.url }
+      return { uploadedBy: metadata.userId, url: file.ufsUrl }
     }),
 
   userAvatar: f({
@@ -41,7 +41,7 @@ export const ourFileRouter = {
     .middleware(auth_middleware)
     .onUploadComplete(async ({ metadata, file }) => {
       console.log('Avatar uploaded by user:', metadata.userId)
-      return { uploadedBy: metadata.userId, url: file.url }
+      return { uploadedBy: metadata.userId, url: file.ufsUrl }
     }),
 } satisfies FileRouter
 
