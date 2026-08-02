@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     if (!result.length) {
       return {
-        title: 'Product Not Found — LuxeHair',
+        title: 'Product Not Found — GotiNova',
         description: 'The product you are looking for does not exist.',
       }
     }
@@ -26,10 +26,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     }
 
     const price = parseFloat(product.price)
-    const title = `${product.name} — LuxeHair`
+    const title = `${product.name} — GotiNova`
     const description = product.description
       ? product.description.slice(0, 160)
-      : `Shop ${product.name} at LuxeHair. ${categoryName ? `Category: ${categoryName}.` : ''} Premium quality hair products. GH₵ ${price.toFixed(2)}.`
+      : `Shop ${product.name} at GotiNova. ${categoryName ? `Category: ${categoryName}.` : ''} Premium quality products. GH₵ ${price.toFixed(2)}.`
 
     return {
       title,
@@ -54,8 +54,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     }
   } catch {
     return {
-      title: 'Product — LuxeHair',
-      description: 'Premium hair and wig products from LuxeHair.',
+      title: 'Product — GotiNova',
+      description: 'Premium products from GotiNova.',
     }
   }
 }

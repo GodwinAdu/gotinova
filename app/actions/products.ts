@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { products, categories, productAttributes } from '@/lib/db/schema'
+import { products, categories, productAttributes, reviews, user as userTable } from '@/lib/db/schema'
 import { eq, like, and, gte, lte } from 'drizzle-orm'
 import { unstable_cache } from 'next/cache'
 
@@ -101,18 +101,35 @@ export async function getProductById(id: string) {
 
 export async function getReviewsForProduct(productId: string) {
   try {
-    // Mock reviews - in real app would fetch from database
-    return [
-      {
-        id: '1',
-        rating: 5,
-        title: 'Excellent Quality',
-        comment: 'Best hair I have purchased. Very thick and long lasting.',
-        userName: 'Amina K.',
-        createdAt: new Date().toISOString(),
-        images: undefined,
-      },
-    ]
+    const result = await db
+      .select({
+        id: reviews.id,
+        rating: reviews.rating,
+        title: reviews.title,
+        comment: reviews.comment,
+        images: reviews.images,
+        userName: userTable.name,
+        createdAt: reviews.createdAt,
+      })
+      .from(reviews)
+      .leftJoin(userTable, eq(reviews.userId, userTable.id))
+      .where(
+        and(
+          eq(reviews.productId, productId),
+          eq(reviews.status, 'approved')
+        )
+      )
+      .limit(20)
+
+    return result.map(r => ({
+      id: r.id,
+      rating: r.rating,
+      title: r.title,
+      comment: r.comment || '',
+      userName: r.userName || 'Customer',
+      createdAt: r.createdAt?.toISOString() || new Date().toISOString(),
+      images: r.images || undefined,
+    }))
   } catch (error) {
     console.error('Error fetching reviews:', error)
     return []
