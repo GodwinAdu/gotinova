@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode, lazy, Suspense } from 'react'
+import { usePathname } from 'next/navigation'
 import { Footer } from './footer'
 import { MobileNav } from './mobile-nav'
 
@@ -17,10 +18,13 @@ interface AppWrapperProps {
 }
 
 export function AppWrapper({ children }: AppWrapperProps) {
+  const pathname = usePathname()
+  const showFooter = pathname === '/'
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-1 pb-14 md:pb-0">{children}</div>
-      <Footer />
+      {showFooter && <Footer />}
       <MobileNav />
       <Suspense fallback={null}>
         <CompareBar />
