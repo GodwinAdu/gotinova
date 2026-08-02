@@ -40,7 +40,7 @@ interface ProductDetails {
 interface Review {
   id: string
   rating: number
-  title?: string
+  title: string | null
   comment: string
   userName: string
   createdAt: string
