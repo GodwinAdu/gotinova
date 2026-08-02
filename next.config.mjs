@@ -4,6 +4,9 @@ const nextConfig = {
   typescript: {
     tsconfigPath: './tsconfig.json',
   },
+  serverActions: {
+    bodySizeLimit: '10mb',
+  },
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', '@radix-ui/react-slot'],
   },

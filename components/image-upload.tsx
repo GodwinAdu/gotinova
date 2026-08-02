@@ -2,9 +2,10 @@
 
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { UploadCloud, X, Loader2, ImageIcon } from 'lucide-react'
+import { UploadCloud, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
+import { useUploadThing } from '@/lib/uploadthing-client'
 
 export interface UploadedImage {
   id: string
@@ -12,19 +13,10 @@ export interface UploadedImage {
   name: string
 }
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
-
 interface ImageUploadProps {
   value: UploadedImage[]
   onChange: (images: UploadedImage[]) => void
-  endpoint?: string
+  endpoint?: 'productImage' | 'reviewImage' | 'userAvatar'
   maxFiles?: number
   maxSize?: number
   disabled?: boolean
@@ -38,8 +30,23 @@ export function ImageUpload({
   maxSize = 16 * 1024 * 1024,
   disabled = false,
 }: ImageUploadProps) {
-  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+
+  const { startUpload, isUploading } = useUploadThing(endpoint, {
+    onClientUploadComplete: (res) => {
+      if (res) {
+        const newImages: UploadedImage[] = res.map((file) => ({
+          id: `img-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          url: file.ufsUrl,
+          name: file.name,
+        }))
+        onChange([...value, ...newImages])
+      }
+    },
+    onUploadError: (err) => {
+      setError(err.message || 'Upload failed. Please try again.')
+    },
+  })
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -50,57 +57,16 @@ export function ImageUpload({
         return
       }
 
-      setUploading(true)
-
-      try {
-        const newImages: UploadedImage[] = []
-
-        for (const file of acceptedFiles) {
-          const id = `img-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-
-          // Try UploadThing endpoint
-          try {
-            const formData = new FormData()
-            formData.append('files', file)
-
-            // Use the UploadThing route handler
-            const res = await fetch('/api/uploadthing', {
-              method: 'POST',
-              body: formData,
-            })
-
-            if (res.ok) {
-              const data = await res.json()
-              const url = Array.isArray(data) ? data[0]?.url : data?.url
-              if (url) {
-                newImages.push({ id, url, name: file.name })
-                continue
-              }
-            }
-          } catch {
-            // Fallback to base64
-          }
-
-          // Fallback: convert to base64 data URL (stored in DB)
-          const dataUrl = await fileToBase64(file)
-          newImages.push({ id, url: dataUrl, name: file.name })
-        }
-
-        onChange([...value, ...newImages])
-      } catch (err) {
-        setError('Upload failed. Please try again.')
-      } finally {
-        setUploading(false)
-      }
+      await startUpload(acceptedFiles)
     },
-    [value, onChange, maxFiles]
+    [value, maxFiles, startUpload]
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { 'image/*': ['.jpeg', '.jpg', '.png', '.webp'] },
     maxSize,
-    disabled: disabled || uploading || value.length >= maxFiles,
+    disabled: disabled || isUploading || value.length >= maxFiles,
     multiple: maxFiles > 1,
   })
 
@@ -119,12 +85,12 @@ export function ImageUpload({
             isDragActive
               ? 'border-primary bg-primary/5 scale-[1.01]'
               : 'border-border hover:border-primary/50 hover:bg-muted/30',
-            (disabled || uploading) && 'opacity-50 cursor-not-allowed'
+            (disabled || isUploading) && 'opacity-50 cursor-not-allowed'
           )}
         >
           <input {...getInputProps()} />
           <div className="flex flex-col items-center gap-2">
-            {uploading ? (
+            {isUploading ? (
               <>
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 <p className="text-sm font-medium">Uploading...</p>
