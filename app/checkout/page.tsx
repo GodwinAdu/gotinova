@@ -79,6 +79,7 @@ export default function CheckoutPage() {
   // Geolocation state
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [locationLoading, setLocationLoading] = useState(false)
+  const [saveAddressChecked, setSaveAddressChecked] = useState(true)
 
   useEffect(() => {
     setMounted(true)
@@ -113,18 +114,36 @@ export default function CheckoutPage() {
       return
     }
 
-    // Pre-fill email from session
-    if (session.user.email) {
-      setFormData(prev => ({ ...prev, email: session.user.email }))
-    }
-    if (session.user.name) {
-      const parts = session.user.name.split(' ')
-      setFormData(prev => ({
-        ...prev,
-        firstName: parts[0] || '',
-        lastName: parts.slice(1).join(' ') || '',
-      }))
-    }
+    // Load saved address, then fall back to session name/email
+    import('@/app/actions/user-address').then(({ getSavedAddress }) => {
+      getSavedAddress().then((saved) => {
+        if (saved) {
+          setFormData(prev => ({
+            ...prev,
+            firstName: saved.firstName || prev.firstName,
+            lastName: saved.lastName || prev.lastName,
+            email: saved.email || prev.email,
+            phone: saved.phone || prev.phone,
+            address: saved.address || prev.address,
+            city: saved.city || prev.city,
+            zipCode: saved.zipCode || prev.zipCode,
+          }))
+        } else {
+          // Fall back to session data
+          if (session.user.email) {
+            setFormData(prev => ({ ...prev, email: session.user.email }))
+          }
+          if (session.user.name) {
+            const parts = session.user.name.split(' ')
+            setFormData(prev => ({
+              ...prev,
+              firstName: parts[0] || '',
+              lastName: parts.slice(1).join(' ') || '',
+            }))
+          }
+        }
+      }).catch(() => {})
+    }).catch(() => {})
   }, [session, isPending, router])
 
   const subtotal = getTotal()
@@ -216,6 +235,14 @@ export default function CheckoutPage() {
 
             clearCart()
             earnPoints(total, result.data?.orderNumber || '')
+
+            // Save address for future orders
+            if (saveAddressChecked) {
+              import('@/app/actions/user-address').then(({ saveAddress }) => {
+                saveAddress({ firstName: formData.firstName, lastName: formData.lastName, email: formData.email, phone: formData.phone, address: formData.address, city: formData.city, zipCode: formData.zipCode }).catch(() => {})
+              }).catch(() => {})
+            }
+
             setOrderData({
               orderNumber: result.data?.orderNumber || '',
               orderId: result.data?.orderId || '',
@@ -270,6 +297,14 @@ export default function CheckoutPage() {
 
       clearCart()
       earnPoints(total, result.data?.orderNumber || '')
+
+      // Save address for future orders
+      if (saveAddressChecked) {
+        import('@/app/actions/user-address').then(({ saveAddress }) => {
+          saveAddress({ firstName: formData.firstName, lastName: formData.lastName, email: formData.email, phone: formData.phone, address: formData.address, city: formData.city, zipCode: formData.zipCode }).catch(() => {})
+        }).catch(() => {})
+      }
+
       setOrderData({
         orderNumber: result.data?.orderNumber || '',
         orderId: result.data?.orderId || '',
@@ -466,6 +501,17 @@ export default function CheckoutPage() {
                     rows={3}
                   />
                 </div>
+
+                {/* Save address checkbox */}
+                <label className="flex items-center gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={saveAddressChecked}
+                    onChange={(e) => setSaveAddressChecked(e.target.checked)}
+                    className="w-4 h-4 rounded border-border accent-primary"
+                  />
+                  <span className="text-sm text-muted-foreground">Save this address for future orders</span>
+                </label>
               </Card>
 
               {/* Payment */}
