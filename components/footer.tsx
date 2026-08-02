@@ -18,7 +18,7 @@ export function Footer() {
               GotiNova
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              Premium quality hair and wigs for every style. Based in Ghana, delivering beauty nationwide.
+              Your one-stop online store for premium products. From hair & beauty to fashion, electronics, and more. Based in Ghana, delivering nationwide.
             </p>
           </div>
 
@@ -27,9 +27,9 @@ export function Footer() {
             <h4 className="font-semibold text-sm mb-3 sm:mb-4">Shop</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">All Products</Link></li>
-              <li><Link href="/products?category=wigs" className="text-muted-foreground hover:text-primary transition-colors">Wigs</Link></li>
-              <li><Link href="/products?category=extensions" className="text-muted-foreground hover:text-primary transition-colors">Extensions</Link></li>
-              <li><Link href="/products?category=closures" className="text-muted-foreground hover:text-primary transition-colors">Closures</Link></li>
+              <li><Link href="/products?category=hair" className="text-muted-foreground hover:text-primary transition-colors">Hair & Beauty</Link></li>
+              <li><Link href="/products?category=fashion" className="text-muted-foreground hover:text-primary transition-colors">Fashion</Link></li>
+              <li><Link href="/products?category=electronics" className="text-muted-foreground hover:text-primary transition-colors">Electronics</Link></li>
             </ul>
           </div>
 
@@ -69,7 +69,7 @@ export function Footer() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h4 className="font-semibold text-sm mb-1">Stay in the loop</h4>
-              <p className="text-xs text-muted-foreground">Get exclusive deals and hair care tips.</p>
+              <p className="text-xs text-muted-foreground">Get exclusive deals and updates on new arrivals.</p>
             </div>
             <NewsletterInline />
           </div>

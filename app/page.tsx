@@ -17,8 +17,8 @@ const InstagramFeed = dynamic(() => import('@/components/instagram-feed').then(m
 const Testimonials = dynamic(() => import('@/components/testimonials').then(m => ({ default: m.Testimonials })))
 
 export const metadata = {
-  title: 'GotiNova - Premium Hair & Beauty Store',
-  description: 'Discover premium quality hair and wigs for every style and need.',
+  title: 'GotiNova - Your One-Stop Online Store',
+  description: 'Shop premium products across categories — hair & beauty, fashion, electronics, health, and more.',
 }
 
 export default async function HomePage() {
@@ -283,10 +283,10 @@ export default async function HomePage() {
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-8 sm:p-12 lg:p-16 text-center">
               <div className="relative z-10">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary-foreground mb-3">
-                  Ready to Transform Your Look?
+                  Ready to Find Something Special?
                 </h2>
                 <p className="text-sm sm:text-base text-primary-foreground/80 mb-6 max-w-md mx-auto">
-                  Join thousands of happy customers who trust GotiNova for their premium hair needs.
+                  Join thousands of happy customers who trust GotiNova for quality products at great prices.
                 </p>
                 <Button asChild size="lg" variant="secondary" className="rounded-xl shadow-lg h-11 px-6">
                   <Link href="/products">
