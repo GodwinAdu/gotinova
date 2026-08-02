@@ -21,18 +21,29 @@ export default function CartPage() {
   const [mounted, setMounted] = useState(false)
   const [showAuthPrompt, setShowAuthPrompt] = useState(false)
 
-  // Hydration fix for Zustand persist
+  // Dynamic pricing from admin settings
+  const [taxRate, setTaxRate] = useState(0.125)
+  const [shippingCost, setShippingCost] = useState(50)
+  const [freeThreshold, setFreeThreshold] = useState(1000)
+
+  // Hydration fix for Zustand persist + load admin settings
   useEffect(() => {
     setMounted(true)
+    import('@/app/actions/settings').then(({ getShippingConfig, getTaxRate }) => {
+      getShippingConfig().then(({ cost, freeThreshold: ft }) => {
+        setShippingCost(cost)
+        setFreeThreshold(ft)
+      }).catch(() => {})
+      getTaxRate().then((rate) => setTaxRate(rate)).catch(() => {})
+    }).catch(() => {})
   }, [])
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0)
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   const bundleSavings = calculateBundleSavings(subtotal, totalItems)
   const afterBundle = subtotal - bundleSavings
-  // These use fallback values; checkout page loads actual config from admin settings
-  const shipping = afterBundle > 1000 ? 0 : 50
-  const tax = afterBundle * 0.125
+  const shipping = afterBundle >= freeThreshold ? 0 : shippingCost
+  const tax = afterBundle * taxRate
   const total = afterBundle + shipping + tax
 
   const handleCheckout = () => {
@@ -193,7 +204,7 @@ export default function CartPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Tax (12.5%)</span>
+                      <span className="text-muted-foreground">Tax ({(taxRate * 100).toFixed(1)}%)</span>
                       <span className="font-medium">{formatPrice(tax)}</span>
                     </div>
                   </div>
@@ -203,9 +214,9 @@ export default function CartPage() {
                     <span className="text-xl font-bold text-primary">{formatPrice(total)}</span>
                   </div>
 
-                  {shipping > 0 && (
+                  {shipping > 0 && afterBundle < freeThreshold && (
                     <p className="text-[11px] text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
-                      💡 Add {formatPrice(1000 - subtotal)} more for free shipping
+                      💡 Add {formatPrice(freeThreshold - afterBundle)} more for free shipping
                     </p>
                   )}
 

@@ -29,6 +29,7 @@ export async function createProduct(data: {
   categoryId: string
   stock: number
   image?: string
+  images?: string
   sku?: string
 }) {
   try {
@@ -44,6 +45,7 @@ export async function createProduct(data: {
       categoryId: data.categoryId,
       stock: data.stock,
       image: data.image,
+      images: data.images,
       sku: data.sku,
       isActive: true,
     })

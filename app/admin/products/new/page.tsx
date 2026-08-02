@@ -103,7 +103,7 @@ export default function NewProductPage() {
       setLoading(true)
 
       const mainImage = images.length > 0 ? images[0].url : undefined
-      const allImages = images.length > 1 ? JSON.stringify(images.map(i => i.url)) : undefined
+      const allImages = images.length > 0 ? JSON.stringify(images.map(i => i.url)) : undefined
 
       const result = await createProduct({
         name,
@@ -113,6 +113,7 @@ export default function NewProductPage() {
         categoryId,
         stock: parseInt(stock),
         image: mainImage,
+        images: allImages,
         sku: sku || undefined,
       })
 

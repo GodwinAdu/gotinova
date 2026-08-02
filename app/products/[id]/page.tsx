@@ -166,8 +166,14 @@ export default function ProductDetail() {
     )
   }
 
-  const productImages = product.images ? JSON.parse(product.images) : [product.image]
+  const productImages = product.images ? JSON.parse(product.images) : (product.image ? [product.image] : [])
   const discount = product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0
+
+  // Only show size guide for hair-related categories
+  const hairCategories = ['wigs', 'hair', 'extensions', 'closures', 'frontals', 'bundles', 'lace']
+  const isHairProduct = hairCategories.some(cat =>
+    product.category.name.toLowerCase().includes(cat)
+  )
 
   return (
     <div className="min-h-screen bg-background">
@@ -183,32 +189,32 @@ export default function ProductDetail() {
         inStock={product.stock > 0}
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm mb-8">
-          <Link href="/" className="text-muted-foreground hover:text-foreground">Home</Link>
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm mb-4 sm:mb-8 overflow-x-auto">
+          <Link href="/" className="text-muted-foreground hover:text-foreground whitespace-nowrap">Home</Link>
           <span className="text-muted-foreground">/</span>
-          <Link href="/products" className="text-muted-foreground hover:text-foreground">Products</Link>
+          <Link href="/products" className="text-muted-foreground hover:text-foreground whitespace-nowrap">Products</Link>
           <span className="text-muted-foreground">/</span>
-          <span className="text-foreground">{product.name}</span>
+          <span className="text-foreground truncate">{product.name}</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-8 sm:mb-12">
           {/* Product Images */}
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-4">
             <ImageZoom
-              src={productImages[selectedImage]}
+              src={productImages[selectedImage] || '/placeholder.jpg'}
               alt={product.name}
               className="aspect-square border border-border"
             />
             {productImages.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto">
+              <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1">
                 {productImages.map((img: string, idx: number) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`w-20 h-20 rounded-xl border-2 flex-shrink-0 overflow-hidden transition-colors ${
-                      selectedImage === idx ? 'border-primary' : 'border-border'
+                    className={`w-14 h-14 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl border-2 flex-shrink-0 overflow-hidden transition-colors ${
+                      selectedImage === idx ? 'border-primary ring-1 ring-primary/30' : 'border-border'
                     }`}
                   >
                     <Image
@@ -225,34 +231,34 @@ export default function ProductDetail() {
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Category Badge */}
-            <Badge variant="outline" className="w-fit">{product.category.name}</Badge>
+            <Badge variant="outline" className="w-fit text-[10px] sm:text-xs">{product.category.name}</Badge>
 
             {/* Title and Rating */}
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
+              <h1 className="text-xl sm:text-3xl font-bold text-foreground mb-1.5 sm:mb-2">{product.name}</h1>
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="flex items-center gap-0.5 sm:gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${i < Math.floor(product.rating) ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">({product.reviewCount} reviews)</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">({product.reviewCount} reviews)</span>
               </div>
             </div>
 
             {/* Price */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold text-primary">GH₵ {Number(product.price).toFixed(2)}</span>
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="text-2xl sm:text-3xl font-bold text-primary">GH₵ {Number(product.price).toFixed(2)}</span>
                 {product.originalPrice && (
                   <>
-                    <span className="text-lg text-muted-foreground line-through">GH₵ {Number(product.originalPrice).toFixed(2)}</span>
-                    <Badge className="bg-destructive text-white">-{discount}%</Badge>
+                    <span className="text-sm sm:text-lg text-muted-foreground line-through">GH₵ {Number(product.originalPrice).toFixed(2)}</span>
+                    <Badge className="bg-destructive text-white text-[10px] sm:text-xs">-{discount}%</Badge>
                   </>
                 )}
               </div>
@@ -260,7 +266,7 @@ export default function ProductDetail() {
 
             {/* Description */}
             <div className="prose prose-sm max-w-none">
-              <p className="text-muted-foreground">{product.description}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{product.description}</p>
             </div>
 
             {/* Bundle Deals */}
@@ -282,34 +288,34 @@ export default function ProductDetail() {
             )}
 
             {/* Stock Status */}
-            <div className="border-t border-border pt-6">
-              <div className="flex items-center gap-3 mb-4">
+            <div className="border-t border-border pt-4 sm:pt-6">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 {product.stock > 0 ? (
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-[10px] sm:text-xs">
                     In Stock ({product.stock} available)
                   </Badge>
                 ) : (
                   <Badge variant="destructive">Out of Stock</Badge>
                 )}
-                <SizeGuideButton />
+                {isHairProduct && <SizeGuideButton />}
               </div>
 
               {product.stock > 0 && (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Quantity Selector */}
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium">Quantity:</span>
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <span className="text-xs sm:text-sm font-medium">Quantity:</span>
                     <div className="flex items-center border border-border rounded">
                       <button
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="px-3 py-2 hover:bg-muted transition-colors"
+                        className="px-2.5 sm:px-3 py-1.5 sm:py-2 hover:bg-muted transition-colors text-sm"
                       >
                         −
                       </button>
-                      <span className="px-4 py-2 border-l border-r border-border">{quantity}</span>
+                      <span className="px-3 sm:px-4 py-1.5 sm:py-2 border-l border-r border-border text-sm">{quantity}</span>
                       <button
                         onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                        className="px-3 py-2 hover:bg-muted transition-colors"
+                        className="px-2.5 sm:px-3 py-1.5 sm:py-2 hover:bg-muted transition-colors text-sm"
                       >
                         +
                       </button>
@@ -317,21 +323,21 @@ export default function ProductDetail() {
                   </div>
 
                   {/* Add to Cart and Wishlist */}
-                  <div className="flex gap-3">
+                  <div className="flex gap-2 sm:gap-3">
                     <Button
                       onClick={handleAddToCart}
                       disabled={addingToCart}
-                      className="flex-1 bg-primary hover:bg-primary/90 text-white"
+                      className="flex-1 bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm h-9 sm:h-11"
                       size="lg"
                     >
                       {addingToCart ? (
                         <>
-                          <Check className="w-4 h-4 mr-2" />
-                          Added to Cart!
+                          <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                          Added!
                         </>
                       ) : (
                         <>
-                          <ShoppingCart className="w-4 h-4 mr-2" />
+                          <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                           Add to Cart
                         </>
                       )}
@@ -341,20 +347,20 @@ export default function ProductDetail() {
                       disabled={togglingWishlist}
                       variant={inWishlist ? 'default' : 'outline'}
                       size="lg"
-                      className="px-4"
+                      className="px-3 sm:px-4 h-9 sm:h-11"
                     >
-                      <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} />
+                      <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWishlist ? 'fill-current' : ''}`} />
                     </Button>
                     <Button
                       variant="outline"
                       size="lg"
-                      className="px-4"
+                      className="px-3 sm:px-4 h-9 sm:h-11"
                       onClick={() => {
                         const url = window.location.href
                         navigator.share?.({ title: product.name, url }) || navigator.clipboard.writeText(url)
                       }}
                     >
-                      <Share2 className="w-4 h-4" />
+                      <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
 
