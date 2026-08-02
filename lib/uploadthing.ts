@@ -18,7 +18,7 @@ const auth_middleware = async () => {
 
 export const ourFileRouter = {
   productImage: f({
-    image: { maxFileSize: '16MB', maxFileCount: 5 },
+    image: { maxFileSize: '30MB', maxFileCount: 5 },
   })
     .middleware(auth_middleware)
     .onUploadComplete(async ({ metadata, file }) => {
@@ -27,7 +27,7 @@ export const ourFileRouter = {
     }),
 
   reviewImage: f({
-    image: { maxFileSize: '8MB', maxFileCount: 3 },
+    image: { maxFileSize: '30MB', maxFileCount: 3 },
   })
     .middleware(auth_middleware)
     .onUploadComplete(async ({ metadata, file }) => {
