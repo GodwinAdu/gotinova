@@ -42,12 +42,14 @@ export async function createReview(productId: string, data: {
       return { success: false, error: 'You have already reviewed this product' }
     }
 
-    // Create review
-    let autoApprove = true
+    // Create review — default to approved unless explicitly configured otherwise
+    let status = 'approved'
     try {
       const { getReviewConfig } = await import('@/app/actions/settings')
       const reviewConfig = await getReviewConfig()
-      autoApprove = reviewConfig.autoApprove
+      if (reviewConfig.autoApprove === false) {
+        status = 'pending'
+      }
     } catch {}
 
     const reviewId = uuid()
@@ -59,7 +61,7 @@ export async function createReview(productId: string, data: {
       title: data.title,
       comment: data.comment,
       images: data.images && data.images.length > 0 ? JSON.stringify(data.images) : null,
-      status: autoApprove ? 'approved' : 'pending',
+      status,
     })
 
     // Update product rating
