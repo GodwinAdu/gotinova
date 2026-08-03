@@ -25,7 +25,7 @@ export default async function HomePage() {
   // Parallel data fetching for faster page load
   const [session, productsResult, categoriesResult] = await Promise.all([
     auth.api.getSession({ headers: await headers() }),
-    getProducts({ limit: 10 }),
+    getProducts({ limit: 30 }),
     getCategories(),
   ])
 
@@ -145,83 +145,80 @@ export default async function HomePage() {
           />
         )}
 
-        {/* Categories */}
+        {/* Categories with Products — Kikuu Style */}
         {categories.length > 0 && (
-          <section className="py-8 sm:py-12 lg:py-16">
-            <FadeInView>
+          <section className="py-6 sm:py-10 lg:py-14">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between mb-5 sm:mb-7">
-                <div>
-                  <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold">Shop by Category</h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    {categories.length} categories available
-                  </p>
-                </div>
+                <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold">Shop by Category</h2>
                 <Link href="/products" className="text-xs sm:text-sm text-primary font-medium hover:underline flex items-center gap-1">
                   See All
                   <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </Link>
               </div>
 
-              {/* Scrollable category strip */}
-              <div className="relative">
-                <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scrollbar-hide">
-                  {/* "All Products" pill */}
-                  <Link
-                    href="/products"
-                    className="snap-start flex-shrink-0 flex items-center gap-2.5 pl-2 pr-4 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 transition-opacity"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                      <Sparkles className="w-4 h-4" />
+              {/* Category sections */}
+              <div className="space-y-8 sm:space-y-10">
+                {categories.slice(0, 6).map((category) => {
+                  const categoryProducts = products.filter(p => p.categoryId === category.id).slice(0, 8)
+                  if (categoryProducts.length === 0) return null
+
+                  return (
+                    <div key={category.id}>
+                      {/* Category header */}
+                      <div className="flex items-center justify-between mb-3 sm:mb-4">
+                        <h3 className="text-sm sm:text-lg font-semibold">{category.name}</h3>
+                        <Link
+                          href={`/products?category=${category.id}`}
+                          className="text-[11px] sm:text-xs text-primary font-medium hover:underline flex items-center gap-1"
+                        >
+                          View All
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+
+                      {/* Horizontal product scroll */}
+                      <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scrollbar-hide">
+                        {categoryProducts.map((product) => (
+                          <Link
+                            key={product.id}
+                            href={`/products/${product.id}`}
+                            className="snap-start flex-shrink-0 w-[140px] sm:w-[170px] group"
+                          >
+                            <div className="aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-muted border border-border/60 mb-2 group-hover:shadow-md transition-shadow">
+                              {product.image ? (
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                                  No image
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-xs sm:text-sm font-medium line-clamp-2 leading-tight mb-0.5 group-hover:text-primary transition-colors">
+                              {product.name}
+                            </p>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs sm:text-sm font-bold text-primary">
+                                GH₵ {parseFloat(product.price).toFixed(0)}
+                              </span>
+                              {product.originalPrice && (
+                                <span className="text-[10px] sm:text-xs text-muted-foreground line-through">
+                                  GH₵ {parseFloat(product.originalPrice).toFixed(0)}
+                                </span>
+                              )}
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                    <span className="text-sm font-medium whitespace-nowrap">All Products</span>
-                  </Link>
-
-                  {categories.slice(0, 12).map((category, i) => {
-                    const colors = [
-                      'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300',
-                      'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
-                      'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300',
-                      'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300',
-                      'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
-                      'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-300',
-                      'bg-pink-50 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300',
-                      'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300',
-                      'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300',
-                      'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-300',
-                      'bg-lime-50 text-lime-700 dark:bg-lime-900/20 dark:text-lime-300',
-                      'bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/20 dark:text-fuchsia-300',
-                    ]
-                    const color = colors[i % colors.length]
-
-                    return (
-                      <Link
-                        key={category.id}
-                        href={`/products?category=${category.id}`}
-                        className={`snap-start flex-shrink-0 flex items-center gap-2 px-4 py-2.5 ${color} rounded-full hover:shadow-md hover:scale-[1.02] transition-all duration-200 border border-transparent hover:border-current/10`}
-                      >
-                        <span className="text-sm font-medium whitespace-nowrap">{category.name}</span>
-                      </Link>
-                    )
-                  })}
-
-                  {/* "More" pill if there are more than 12 categories */}
-                  {categories.length > 12 && (
-                    <Link
-                      href="/products"
-                      className="snap-start flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-muted text-muted-foreground rounded-full hover:bg-muted/80 transition-colors border border-border"
-                    >
-                      <span className="text-sm font-medium whitespace-nowrap">+{categories.length - 12} more</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  )}
-                </div>
-
-                {/* Fade edges on desktop to hint at scrollability */}
-                <div className="hidden sm:block absolute top-0 right-0 bottom-2 w-16 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+                  )
+                })}
               </div>
             </div>
-            </FadeInView>
           </section>
         )}
 
