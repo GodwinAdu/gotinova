@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
 import { createReview, getProductReviews, updateReview, deleteReview } from '@/app/actions/reviews'
+import { useUploadThing } from '@/lib/uploadthing-client'
 import { useSession } from '@/lib/auth-client'
 import { formatDate } from '@/lib/utils/format'
 import { ConfirmDialog } from '@/components/confirm-dialog'
@@ -72,26 +73,28 @@ function ReviewForm({ productId, onSuccess }: { productId: string; onSuccess: ()
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // UploadThing hook for review images
+  const { startUpload, isUploading } = useUploadThing('reviewImage', {
+    onClientUploadComplete: (res) => {
+      if (res) {
+        const urls = res.map(f => f.ufsUrl)
+        setImages(prev => [...prev, ...urls])
+      }
+    },
+    onUploadError: (err) => {
+      setError(err.message || 'Failed to upload image')
+    },
+  })
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
-    if (!files) return
+    if (!files || files.length === 0) return
     if (images.length + files.length > 3) {
       setError('Maximum 3 photos allowed')
       return
     }
-
     setError('')
-    Array.from(files).forEach((file) => {
-      if (file.size > 2 * 1024 * 1024) {
-        setError('Each image must be under 2MB')
-        return
-      }
-      const reader = new FileReader()
-      reader.onload = () => {
-        setImages((prev) => [...prev, reader.result as string])
-      }
-      reader.readAsDataURL(file)
-    })
+    await startUpload(Array.from(files))
   }
 
   const removeImage = (index: number) => {
@@ -215,19 +218,26 @@ function ReviewForm({ productId, onSuccess }: { productId: string; onSuccess: ()
               </div>
             ))}
             {images.length < 3 && (
-              <label className="w-16 h-16 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center cursor-pointer transition-colors">
-                <Camera className="w-5 h-5 text-muted-foreground" />
+              <label className={`w-16 h-16 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center cursor-pointer transition-colors ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                {isUploading ? (
+                  <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                ) : (
+                  <Camera className="w-5 h-5 text-muted-foreground" />
+                )}
                 <input
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={handleImageUpload}
                   className="hidden"
+                  disabled={isUploading}
                 />
               </label>
             )}
           </div>
-          <p className="text-[11px] text-muted-foreground mt-1.5">Up to 3 photos (JPEG, PNG)</p>
+          <p className="text-[11px] text-muted-foreground mt-1.5">
+            {isUploading ? 'Uploading...' : 'Up to 3 photos (JPEG, PNG, max 32MB each)'}
+          </p>
         </div>
 
         {/* Error */}
