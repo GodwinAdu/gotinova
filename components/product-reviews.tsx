@@ -250,13 +250,18 @@ function ReviewForm({ productId, onSuccess }: { productId: string; onSuccess: ()
         {/* Submit */}
         <Button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || isUploading}
           className="w-full rounded-xl"
         >
           {submitting ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               Submitting...
+            </>
+          ) : isUploading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Uploading images...
             </>
           ) : (
             'Submit Review'

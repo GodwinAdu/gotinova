@@ -34,6 +34,14 @@ export async function createReview(productId: string, data: {
       return { success: false, error: 'Product not found' }
     }
 
+    // Check if user already reviewed this product
+    const existingReview = await db.select().from(reviews).where(
+      and(eq(reviews.userId, userId), eq(reviews.productId, productId))
+    )
+    if (existingReview.length > 0) {
+      return { success: false, error: 'You have already reviewed this product' }
+    }
+
     // Create review
     let autoApprove = true
     try {
@@ -42,8 +50,9 @@ export async function createReview(productId: string, data: {
       autoApprove = reviewConfig.autoApprove
     } catch {}
 
+    const reviewId = uuid()
     await db.insert(reviews).values({
-      id: uuid(),
+      id: reviewId,
       userId,
       productId,
       rating: data.rating,
@@ -53,11 +62,23 @@ export async function createReview(productId: string, data: {
       status: autoApprove ? 'approved' : 'pending',
     })
 
+    // Update product rating
+    try {
+      const allReviews = await db.select({ rating: reviews.rating }).from(reviews).where(
+        and(eq(reviews.productId, productId), eq(reviews.status, 'approved'))
+      )
+      const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length
+      await db.update(products).set({
+        rating: avgRating.toFixed(2),
+        reviewCount: allReviews.length,
+      }).where(eq(products.id, productId))
+    } catch {}
+
     revalidatePath(`/products/${productId}`)
     return { success: true, message: 'Review submitted successfully! Thank you for your feedback.' }
-  } catch (error) {
-    console.error('Error creating review:', error)
-    return { success: false, error: 'Failed to create review' }
+  } catch (error: any) {
+    console.error('Error creating review:', error?.message || error)
+    return { success: false, error: error?.message || 'Failed to create review' }
   }
 }
 
