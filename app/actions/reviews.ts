@@ -35,8 +35,12 @@ export async function createReview(productId: string, data: {
     }
 
     // Create review
-    const { getReviewConfig } = await import('@/app/actions/settings')
-    const reviewConfig = await getReviewConfig()
+    let autoApprove = true
+    try {
+      const { getReviewConfig } = await import('@/app/actions/settings')
+      const reviewConfig = await getReviewConfig()
+      autoApprove = reviewConfig.autoApprove
+    } catch {}
 
     await db.insert(reviews).values({
       id: uuid(),
@@ -46,7 +50,7 @@ export async function createReview(productId: string, data: {
       title: data.title,
       comment: data.comment,
       images: data.images && data.images.length > 0 ? JSON.stringify(data.images) : null,
-      status: reviewConfig.autoApprove ? 'approved' : 'pending',
+      status: autoApprove ? 'approved' : 'pending',
     })
 
     revalidatePath(`/products/${productId}`)

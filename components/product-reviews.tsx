@@ -80,7 +80,7 @@ function ReviewForm({ productId, onSuccess }: { productId: string; onSuccess: ()
       return
     }
 
-    // Convert to base64 data URLs (stored directly in DB)
+    setError('')
     Array.from(files).forEach((file) => {
       if (file.size > 2 * 1024 * 1024) {
         setError('Each image must be under 2MB')
@@ -88,8 +88,7 @@ function ReviewForm({ productId, onSuccess }: { productId: string; onSuccess: ()
       }
       const reader = new FileReader()
       reader.onload = () => {
-        const dataUrl = reader.result as string
-        setImages((prev) => [...prev, dataUrl])
+        setImages((prev) => [...prev, reader.result as string])
       }
       reader.readAsDataURL(file)
     })
@@ -132,8 +131,13 @@ function ReviewForm({ productId, onSuccess }: { productId: string; onSuccess: ()
       } else {
         setError(result.error || 'Failed to submit review')
       }
-    } catch {
-      setError('Something went wrong')
+    } catch (err: any) {
+      console.error('Review submit error:', err)
+      if (err?.message?.includes('Body exceeded') || err?.digest?.includes('413')) {
+        setError('Images are too large. Try removing images or using smaller ones.')
+      } else {
+        setError(err?.message || 'Something went wrong. Please try again.')
+      }
     } finally {
       setSubmitting(false)
     }
