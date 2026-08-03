@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { reviews, products } from '@/lib/db/schema'
+import { reviews, products, user as userTable } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
@@ -84,8 +84,6 @@ export async function createReview(productId: string, data: {
 
 export async function getProductReviews(productId: string, limit = 20) {
   try {
-    const { user: userTable } = await import('@/lib/db/schema')
-
     const result = await db
       .select({
         id: reviews.id,
