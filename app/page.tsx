@@ -5,6 +5,7 @@ import { ProductCard } from '@/components/product-card'
 import { FadeInView } from '@/components/page-transition'
 import { HeroCarousel } from '@/components/hero-carousel'
 import { AnnouncementBar } from '@/components/announcement-bar'
+import { CategoryProducts } from '@/components/category-products'
 import { getProducts, getCategories } from '@/app/actions/products'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -147,78 +148,8 @@ export default async function HomePage() {
           />
         )}
 
-        {/* Categories with Products — Amazon/Jumia Style Grid */}
-        {categories.length > 0 && (
-          <section className="py-6 sm:py-10 lg:py-14 bg-muted/20">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center justify-between mb-5 sm:mb-7">
-                <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold">Shop by Category</h2>
-                <Link href="/products" className="text-xs sm:text-sm text-primary font-medium hover:underline flex items-center gap-1">
-                  See All
-                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                </Link>
-              </div>
-
-              {/* Category cards grid — 2 cols mobile, 3 tablet, 4 desktop */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {categories.slice(0, 8).map((category) => {
-                  const categoryProducts = products.filter(p => p.categoryId === category.id).slice(0, 4)
-
-                  return (
-                    <div key={category.id} className="bg-card border border-border/60 rounded-2xl p-3 sm:p-4 hover:shadow-lg hover:border-primary/20 transition-all duration-300 group">
-                      {/* Category title */}
-                      <h3 className="text-sm sm:text-base font-bold text-foreground mb-2.5 sm:mb-3 line-clamp-1">
-                        {category.name}
-                      </h3>
-
-                      {/* 2x2 product thumbnail grid */}
-                      {categoryProducts.length > 0 ? (
-                        <Link href={`/products?category=${category.id}`} className="block">
-                          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-2.5 sm:mb-3">
-                            {categoryProducts.map((product) => (
-                              <div key={product.id} className="aspect-square rounded-lg sm:rounded-xl overflow-hidden bg-muted/50 border border-border/40">
-                                {product.image ? (
-                                  <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                    loading="lazy"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-[9px] text-muted-foreground">
-                                    No img
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                            {/* Fill empty slots */}
-                            {Array.from({ length: 4 - categoryProducts.length }).map((_, i) => (
-                              <div key={`empty-${i}`} className="aspect-square rounded-lg sm:rounded-xl bg-muted/30 border border-border/30" />
-                            ))}
-                          </div>
-                        </Link>
-                      ) : (
-                        <Link href={`/products?category=${category.id}`} className="block">
-                          <div className="aspect-[2/1.5] rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 border border-border/30 flex items-center justify-center mb-2.5 sm:mb-3">
-                            <Sparkles className="w-8 h-8 text-primary/30" />
-                          </div>
-                        </Link>
-                      )}
-
-                      {/* "See more" link */}
-                      <Link
-                        href={`/products?category=${category.id}`}
-                        className="text-[11px] sm:text-xs text-primary font-medium hover:underline"
-                      >
-                        See more
-                      </Link>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </section>
-        )}
+        {/* Categories with Products — Tabbed */}
+        <CategoryProducts categories={categories} products={products} />
 
         {/* Featured Products */}
         <section className="py-10 sm:py-14 lg:py-16 bg-muted/30">
