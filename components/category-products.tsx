@@ -70,46 +70,51 @@ export function CategoryProducts({ categories, products }: CategoryProductsProps
           </Link>
         </div>
 
-        {/* Category Tabs — compact, scrollable */}
-        <div className="relative mb-4 sm:mb-6">
-          <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
-            {/* "All" tab */}
-            <button
-              onClick={() => handleTabChange('all')}
-              className={`flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-medium transition-all whitespace-nowrap ${
-                activeTab === 'all'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-muted/80 text-muted-foreground hover:text-foreground hover:bg-muted'
-              }`}
-            >
-              All ({products.length})
-            </button>
+        {/* Category Tabs — compact, auto-scrolling on mobile */}
+        <div className="relative mb-4 sm:mb-6 overflow-hidden">
+          <div className="flex gap-1.5 sm:gap-2 sm:overflow-x-auto pb-1.5 sm:-mx-0 sm:px-0 scrollbar-hide sm:animate-none animate-scroll-left">
+            {/* Render tabs (duplicated for seamless loop on mobile) */}
+            {[0, 1].map((pass) => (
+              <div key={pass} className={`flex gap-1.5 sm:gap-2 ${pass === 1 ? 'sm:hidden' : ''}`}>
+                {/* "All" tab */}
+                <button
+                  onClick={() => handleTabChange('all')}
+                  className={`flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-medium transition-all whitespace-nowrap ${
+                    activeTab === 'all'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted/80 text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  All ({products.length})
+                </button>
 
-            {/* Category tabs */}
-            {visibleCategories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleTabChange(category.id)}
-                className={`flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-medium transition-all whitespace-nowrap ${
-                  activeTab === category.id
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'bg-muted/80 text-muted-foreground hover:text-foreground hover:bg-muted'
-                }`}
-              >
-                {category.name}
-              </button>
+                {/* Category tabs */}
+                {visibleCategories.map((category) => (
+                  <button
+                    key={`${pass}-${category.id}`}
+                    onClick={() => handleTabChange(category.id)}
+                    className={`flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-medium transition-all whitespace-nowrap ${
+                      activeTab === category.id
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-muted/80 text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+
+                {/* "More" button */}
+                {hasMoreTabs && !showAllTabs && pass === 0 && (
+                  <button
+                    onClick={() => setShowAllTabs(true)}
+                    className="flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-medium bg-muted/80 text-muted-foreground hover:text-foreground hover:bg-muted transition-all whitespace-nowrap flex items-center gap-1"
+                  >
+                    +{categories.length - 15} more
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
             ))}
-
-            {/* "More" button for 100s of categories */}
-            {hasMoreTabs && !showAllTabs && (
-              <button
-                onClick={() => setShowAllTabs(true)}
-                className="flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-medium bg-muted/80 text-muted-foreground hover:text-foreground hover:bg-muted transition-all whitespace-nowrap flex items-center gap-1"
-              >
-                +{categories.length - 15} more
-                <ChevronDown className="w-3 h-3" />
-              </button>
-            )}
           </div>
         </div>
 

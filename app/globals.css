@@ -228,3 +228,20 @@
     transform: translateX(100%);
   }
 }
+
+/* Auto-scroll animation for category tabs on mobile */
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (max-width: 639px) {
+  .animate-scroll-left {
+    animation: scroll-left 20s linear infinite;
+    width: max-content;
+  }
+  .animate-scroll-left:hover,
+  .animate-scroll-left:active {
+    animation-play-state: paused;
+  }
+}
