@@ -4,6 +4,7 @@ import { Header } from '@/components/header'
 import { ProductCard } from '@/components/product-card'
 import { FadeInView } from '@/components/page-transition'
 import { HeroCarousel } from '@/components/hero-carousel'
+import { AnnouncementBar } from '@/components/announcement-bar'
 import { getProducts, getCategories } from '@/app/actions/products'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -34,6 +35,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <AnnouncementBar />
       <Header user={session?.user} />
       <main className="min-h-screen bg-background">
         {/* Hero Section */}

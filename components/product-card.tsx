@@ -42,8 +42,10 @@ export const ProductCard = memo(function ProductCard({
   const numOriginalPrice = originalPrice ? (typeof originalPrice === 'string' ? parseFloat(originalPrice) : originalPrice) : null
   const discount = numOriginalPrice ? Math.round((1 - numPrice / numOriginalPrice) * 100) : null
   const numRating = Number(rating || 0)
+  const isOutOfStock = stock !== undefined && stock <= 0
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return
     hapticFeedback('light')
     addItem({
       productId: id,
@@ -81,8 +83,17 @@ export const ProductCard = memo(function ProductCard({
           </div>
         )}
 
+        {/* Sold Out overlay */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <span className="bg-white/90 dark:bg-card/90 text-foreground text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full shadow">
+              Sold Out
+            </span>
+          </div>
+        )}
+
         {/* Stock urgency */}
-        {stock !== undefined && stock > 0 && stock <= 5 && (
+        {!isOutOfStock && stock !== undefined && stock > 0 && stock <= 5 && (
           <div className="absolute bottom-2.5 left-2.5 bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold shadow-sm animate-pulse">
             🔥 Only {stock} left!
           </div>
@@ -156,26 +167,37 @@ export const ProductCard = memo(function ProductCard({
           )}
         </div>
 
-        {/* Add to Cart */}
-        <Button
-          onClick={handleAddToCart}
-          disabled={added}
-          size="sm"
-          variant={added ? 'outline' : 'default'}
-          className="w-full h-9 sm:h-10 text-xs sm:text-sm gap-1.5 font-medium rounded-xl mt-1.5"
-        >
-          {added ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="text-emerald-600">Added to Cart</span>
-            </>
-          ) : (
-            <>
-              <ShoppingCart className="w-3.5 h-3.5" />
-              Add to Cart
-            </>
-          )}
-        </Button>
+        {/* Add to Cart / Sold Out */}
+        {isOutOfStock ? (
+          <Button
+            disabled
+            size="sm"
+            variant="outline"
+            className="w-full h-9 sm:h-10 text-xs sm:text-sm font-medium rounded-xl mt-1.5 opacity-60"
+          >
+            Out of Stock
+          </Button>
+        ) : (
+          <Button
+            onClick={handleAddToCart}
+            disabled={added}
+            size="sm"
+            variant={added ? 'outline' : 'default'}
+            className="w-full h-9 sm:h-10 text-xs sm:text-sm gap-1.5 font-medium rounded-xl mt-1.5"
+          >
+            {added ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-emerald-600">Added to Cart</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-3.5 h-3.5" />
+                Add to Cart
+              </>
+            )}
+          </Button>
+        )}
       </div>
     </div>
   )
