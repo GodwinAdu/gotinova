@@ -147,97 +147,71 @@ export default async function HomePage() {
           />
         )}
 
-        {/* Categories with Products */}
+        {/* Categories with Products — Amazon/Jumia Style Grid */}
         {categories.length > 0 && (
-          <section className="py-6 sm:py-10 lg:py-14">
+          <section className="py-6 sm:py-10 lg:py-14 bg-muted/20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between mb-5 sm:mb-7">
-                <div>
-                  <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold">Shop by Category</h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">Browse our collections</p>
-                </div>
+                <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold">Shop by Category</h2>
                 <Link href="/products" className="text-xs sm:text-sm text-primary font-medium hover:underline flex items-center gap-1">
                   See All
                   <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </Link>
               </div>
 
-              {/* Category rows with products */}
-              <div className="space-y-8 sm:space-y-10">
-                {categories.slice(0, 6).map((category) => {
-                  const categoryProducts = products.filter(p => p.categoryId === category.id).slice(0, 10)
+              {/* Category cards grid — 2 cols mobile, 3 tablet, 4 desktop */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                {categories.slice(0, 8).map((category) => {
+                  const categoryProducts = products.filter(p => p.categoryId === category.id).slice(0, 4)
 
                   return (
-                    <div key={category.id}>
-                      {/* Category header */}
-                      <div className="flex items-center justify-between mb-3 sm:mb-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-1 h-5 sm:h-6 bg-primary rounded-full" />
-                          <h3 className="text-sm sm:text-lg font-bold text-foreground">{category.name}</h3>
-                          {categoryProducts.length > 0 && (
-                            <span className="text-[10px] sm:text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                              {categoryProducts.length} items
-                            </span>
-                          )}
-                        </div>
-                        <Link
-                          href={`/products?category=${category.id}`}
-                          className="text-[11px] sm:text-xs text-primary font-medium hover:underline flex items-center gap-1 bg-primary/5 px-2.5 py-1 rounded-lg hover:bg-primary/10 transition-colors"
-                        >
-                          View All
-                          <ArrowRight className="w-3 h-3" />
-                        </Link>
-                      </div>
+                    <div key={category.id} className="bg-card border border-border/60 rounded-2xl p-3 sm:p-4 hover:shadow-lg hover:border-primary/20 transition-all duration-300 group">
+                      {/* Category title */}
+                      <h3 className="text-sm sm:text-base font-bold text-foreground mb-2.5 sm:mb-3 line-clamp-1">
+                        {category.name}
+                      </h3>
 
-                      {/* Products row — horizontal scroll on mobile, grid-like on desktop */}
+                      {/* 2x2 product thumbnail grid */}
                       {categoryProducts.length > 0 ? (
-                        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scrollbar-hide">
-                          {categoryProducts.map((product) => (
-                            <div
-                              key={product.id}
-                              className="snap-start flex-shrink-0 w-[150px] sm:w-[180px] lg:w-[200px]"
-                            >
-                              <ProductCard
-                                id={product.id}
-                                name={product.name}
-                                price={product.price}
-                                originalPrice={product.originalPrice}
-                                image={product.image}
-                                rating={product.rating}
-                                reviewCount={product.reviewCount}
-                                description={product.description}
-                                stock={product.stock}
-                              />
-                            </div>
-                          ))}
-
-                          {/* "See more" card at end */}
-                          <Link
-                            href={`/products?category=${category.id}`}
-                            className="snap-start flex-shrink-0 w-[150px] sm:w-[180px] lg:w-[200px] flex items-center justify-center"
-                          >
-                            <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-primary/20 bg-primary/5 flex flex-col items-center justify-center gap-2 hover:bg-primary/10 hover:border-primary/40 transition-all">
-                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                <ArrowRight className="w-5 h-5 text-primary" />
+                        <Link href={`/products?category=${category.id}`} className="block">
+                          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-2.5 sm:mb-3">
+                            {categoryProducts.map((product) => (
+                              <div key={product.id} className="aspect-square rounded-lg sm:rounded-xl overflow-hidden bg-muted/50 border border-border/40">
+                                {product.image ? (
+                                  <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-[9px] text-muted-foreground">
+                                    No img
+                                  </div>
+                                )}
                               </div>
-                              <span className="text-xs font-medium text-primary">View All</span>
-                              <span className="text-[10px] text-muted-foreground">{category.name}</span>
-                            </div>
-                          </Link>
-                        </div>
-                      ) : (
-                        /* Empty category — show browse card */
-                        <Link
-                          href={`/products?category=${category.id}`}
-                          className="block p-6 sm:p-8 rounded-2xl border border-dashed border-border bg-muted/30 hover:bg-muted/50 transition-colors text-center group"
-                        >
-                          <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Sparkles className="w-6 h-6 text-primary" />
+                            ))}
+                            {/* Fill empty slots */}
+                            {Array.from({ length: 4 - categoryProducts.length }).map((_, i) => (
+                              <div key={`empty-${i}`} className="aspect-square rounded-lg sm:rounded-xl bg-muted/30 border border-border/30" />
+                            ))}
                           </div>
-                          <p className="text-sm font-medium text-foreground">Browse {category.name}</p>
-                          <p className="text-xs text-muted-foreground mt-1">Products coming soon</p>
+                        </Link>
+                      ) : (
+                        <Link href={`/products?category=${category.id}`} className="block">
+                          <div className="aspect-[2/1.5] rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 border border-border/30 flex items-center justify-center mb-2.5 sm:mb-3">
+                            <Sparkles className="w-8 h-8 text-primary/30" />
+                          </div>
                         </Link>
                       )}
+
+                      {/* "See more" link */}
+                      <Link
+                        href={`/products?category=${category.id}`}
+                        className="text-[11px] sm:text-xs text-primary font-medium hover:underline"
+                      >
+                        See more
+                      </Link>
                     </div>
                   )
                 })}
