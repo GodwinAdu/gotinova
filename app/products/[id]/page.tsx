@@ -8,12 +8,14 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
 import { getProductById, getReviewsForProduct, getFrequentlyBoughtTogether } from '@/app/actions/products'
+import { getProductVariants } from '@/app/actions/variants'
 import { toggleWishlist, isInWishlist } from '@/app/actions/wishlist'
 import { useSession } from '@/lib/auth-client'
 import { addToRecentlyViewed } from '@/lib/utils/recently-viewed'
 import { RecentlyViewed } from '@/components/recently-viewed'
 import { ProductReviews } from '@/components/product-reviews'
 import { ProductRecommendations } from '@/components/product-recommendations'
+import { VariantSelector } from '@/components/variant-selector'
 import { ImageZoom } from '@/components/image-zoom'
 import { SizeGuideButton } from '@/components/size-guide'
 import { NotifyBackInStock } from '@/components/notify-back-in-stock'
@@ -55,6 +57,8 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<ProductDetails | null>(null)
   const [reviews, setReviews] = useState<Review[]>([])
   const [relatedProducts, setRelatedProducts] = useState<any[]>([])
+  const [variants, setVariants] = useState<any[]>([])
+  const [selectedVariant, setSelectedVariant] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState(0)
@@ -76,6 +80,12 @@ export default function ProductDetail() {
         setProduct(productData)
         setReviews(reviewsData)
         setRelatedProducts(relatedData)
+
+        // Load variants
+        const variantsResult = await getProductVariants(productId)
+        if (variantsResult.success && variantsResult.data) {
+          setVariants(variantsResult.data)
+        }
 
         // Track in recently viewed
         addToRecentlyViewed({
@@ -103,13 +113,17 @@ export default function ProductDetail() {
   const handleAddToCart = async () => {
     if (!product) return
 
+    // Use selected variant price if available
+    const cartPrice = selectedVariant ? selectedVariant.price : product.price
+    const cartName = selectedVariant ? `${product.name} (${selectedVariant.name})` : product.name
+
     // Use local cart store — no login required
     const { useCartStore } = await import('@/lib/store')
     useCartStore.getState().addItem({
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image || '/placeholder.jpg',
+      productId: selectedVariant ? `${product.id}_${selectedVariant.id}` : product.id,
+      name: cartName,
+      price: cartPrice,
+      image: selectedVariant?.image || product.image || '/placeholder.jpg',
       quantity,
     })
     setAddingToCart(true)
@@ -284,6 +298,16 @@ export default function ProductDetail() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Variant Selector */}
+            {variants.length > 0 && (
+              <div className="border-t border-border pt-6">
+                <VariantSelector
+                  variants={variants}
+                  onSelect={setSelectedVariant}
+                />
               </div>
             )}
 

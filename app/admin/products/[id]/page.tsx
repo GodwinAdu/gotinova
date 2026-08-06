@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ImageUpload } from '@/components/image-upload'
 import { ConfirmDialog } from '@/components/confirm-dialog'
+import { VariantEditor, type Variant } from '@/components/variant-editor'
 import Link from 'next/link'
 import { updateProduct, deleteProduct } from '@/app/actions/admin'
 import { getProductById, getCategories } from '@/app/actions/products'
+import { getProductVariants, saveProductVariants } from '@/app/actions/variants'
 
 interface Category {
   id: string
@@ -47,6 +49,7 @@ export default function EditProductPage() {
   const [sku, setSku] = useState('')
   const [isActive, setIsActive] = useState(true)
   const [images, setImages] = useState<UploadedImage[]>([])
+  const [variants, setVariants] = useState<Variant[]>([])
 
   useEffect(() => {
     loadProduct()
@@ -55,13 +58,25 @@ export default function EditProductPage() {
   const loadProduct = async () => {
     setLoading(true)
     try {
-      const [product, categoriesResult] = await Promise.all([
+      const [product, categoriesResult, variantsResult] = await Promise.all([
         getProductById(productId),
         getCategories(),
+        getProductVariants(productId),
       ])
 
       if (categoriesResult.success && categoriesResult.data) {
         setCategories(categoriesResult.data)
+      }
+
+      if (variantsResult.success && variantsResult.data) {
+        setVariants(variantsResult.data.map((v: any) => ({
+          id: v.id,
+          name: v.name,
+          options: v.options,
+          price: v.price,
+          stock: v.stock,
+          sku: v.sku || undefined,
+        })))
       }
 
       if (product) {
@@ -109,6 +124,20 @@ export default function EditProductPage() {
         isActive,
         image: mainImage || null,
       })
+
+      // Save variants
+      if (variants.length > 0) {
+        await saveProductVariants(productId, variants.map(v => ({
+          name: v.name,
+          options: v.options,
+          price: v.price,
+          stock: v.stock,
+          sku: v.sku,
+        })))
+      } else {
+        // Clear variants if none
+        await saveProductVariants(productId, [])
+      }
 
       if (result.success) {
         setSuccess('Product updated successfully!')
@@ -264,6 +293,9 @@ export default function EditProductPage() {
                 maxSize={16 * 1024 * 1024}
               />
             </Card>
+
+            {/* Variants */}
+            <VariantEditor variants={variants} onChange={setVariants} />
           </div>
 
           {/* Sidebar */}

@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ImageUpload } from '@/components/image-upload'
+import { VariantEditor, type Variant } from '@/components/variant-editor'
 import Link from 'next/link'
 import { createProduct } from '@/app/actions/admin'
 import { getCategories } from '@/app/actions/products'
@@ -33,7 +34,7 @@ export default function NewProductPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [activeTab, setActiveTab] = useState<'basic' | 'details' | 'images'>('basic')
+  const [activeTab, setActiveTab] = useState<'basic' | 'details' | 'images' | 'variants'>('basic')
 
   // Form state
   const [name, setName] = useState('')
@@ -56,6 +57,9 @@ export default function NewProductPage() {
 
   // Images
   const [images, setImages] = useState<UploadedImage[]>([])
+
+  // Variants
+  const [variants, setVariants] = useState<Variant[]>([])
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -118,6 +122,17 @@ export default function NewProductPage() {
       })
 
       if (result.success) {
+        // Save variants if any
+        if (variants.length > 0 && result.data?.id) {
+          const { saveProductVariants } = await import('@/app/actions/variants')
+          await saveProductVariants(result.data.id, variants.map(v => ({
+            name: v.name,
+            options: v.options,
+            price: v.price,
+            stock: v.stock,
+            sku: v.sku,
+          })))
+        }
         router.push('/admin/products')
       } else {
         setError(result.error || 'Failed to create product')
@@ -135,7 +150,8 @@ export default function NewProductPage() {
 
   const tabs = [
     { id: 'basic' as const, label: 'Basic Info' },
-    { id: 'details' as const, label: 'Details & Attributes' },
+    { id: 'details' as const, label: 'Attributes' },
+    { id: 'variants' as const, label: 'Variants' },
     { id: 'images' as const, label: 'Images' },
   ]
 
@@ -474,6 +490,11 @@ export default function NewProductPage() {
                   </ul>
                 </div>
               </Card>
+            )}
+
+            {/* Variants Tab */}
+            {activeTab === 'variants' && (
+              <VariantEditor variants={variants} onChange={setVariants} />
             )}
           </div>
 

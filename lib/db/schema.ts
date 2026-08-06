@@ -86,6 +86,19 @@ export const productAttributes = pgTable('productAttributes', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
+export const productVariants = pgTable('productVariants', {
+  id: text('id').primaryKey(),
+  productId: text('productId').notNull().references(() => products.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(), // e.g. "Black / Large", "12 inch / Brown"
+  options: text('options').notNull(), // JSON: {"Size":"Large","Color":"Black"}
+  price: decimal('price', { precision: 10, scale: 2 }).notNull(),
+  stock: integer('stock').notNull().default(0),
+  sku: text('sku'),
+  image: text('image'),
+  isActive: boolean('isActive').default(true),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+})
+
 export const cartItems = pgTable(
   'cartItems',
   {
