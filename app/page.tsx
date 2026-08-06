@@ -15,7 +15,6 @@ import dynamic from 'next/dynamic'
 // Lazy-load below-the-fold components
 const RecentlyViewed = dynamic(() => import('@/components/recently-viewed').then(m => ({ default: m.RecentlyViewed })))
 const FlashSale = dynamic(() => import('@/components/flash-sale').then(m => ({ default: m.FlashSale })))
-const InstagramFeed = dynamic(() => import('@/components/instagram-feed').then(m => ({ default: m.InstagramFeed })))
 const Testimonials = dynamic(() => import('@/components/testimonials').then(m => ({ default: m.Testimonials })))
 
 export const metadata = {
@@ -231,9 +230,6 @@ export default async function HomePage() {
 
         {/* Customer Testimonials */}
         <Testimonials />
-
-        {/* Instagram Feed */}
-        <InstagramFeed />
       </main>
     </>
   )
