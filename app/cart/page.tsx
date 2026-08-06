@@ -266,12 +266,12 @@ export default function CartPage() {
 
               <div className="space-y-3">
                 <Button asChild className="w-full h-11 rounded-xl font-medium">
-                  <Link href="/sign-in?redirect=/cart">
+                  <Link href="/sign-in?redirect=/checkout">
                     Sign In
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full h-11 rounded-xl font-medium">
-                  <Link href="/sign-up?redirect=/cart">
+                  <Link href="/sign-up?redirect=/checkout">
                     Create Account
                   </Link>
                 </Button>

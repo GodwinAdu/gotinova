@@ -10,10 +10,13 @@ export const metadata = {
   description: 'Sign in to your GotiNova account to shop premium hair and wigs',
 }
 
-export default async function SignInPage() {
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ redirect?: string }> }) {
   const session = await auth.api.getSession({ headers: await headers() })
+  const params = await searchParams
+  const redirectTo = params?.redirect || '/'
+
   if (session?.user) {
-    redirect('/')
+    redirect(redirectTo)
   }
 
   return (
