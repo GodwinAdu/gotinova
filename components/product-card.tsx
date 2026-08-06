@@ -83,6 +83,13 @@ export const ProductCard = memo(function ProductCard({
           </div>
         )}
 
+        {/* Free delivery badge */}
+        {!discount && numPrice >= 1000 && (
+          <div className="absolute top-2.5 left-2.5 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold shadow-sm">
+            Free Delivery
+          </div>
+        )}
+
         {/* Sold Out overlay */}
         {isOutOfStock && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

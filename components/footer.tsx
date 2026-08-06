@@ -77,6 +77,35 @@ export function Footer() {
 
         {/* Bottom */}
         <div className="border-t pt-6 sm:pt-8">
+          {/* Payment methods */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-5">
+            <span className="text-[10px] text-muted-foreground mr-1">We accept:</span>
+            {/* MTN MoMo */}
+            <div className="h-7 px-2.5 bg-[#ffcc00] rounded-md flex items-center justify-center">
+              <span className="text-[10px] font-bold text-black">MTN MoMo</span>
+            </div>
+            {/* Vodafone Cash */}
+            <div className="h-7 px-2.5 bg-[#e60000] rounded-md flex items-center justify-center">
+              <span className="text-[10px] font-bold text-white">Vodafone</span>
+            </div>
+            {/* AirtelTigo */}
+            <div className="h-7 px-2.5 bg-[#0033a0] rounded-md flex items-center justify-center">
+              <span className="text-[10px] font-bold text-white">AirtelTigo</span>
+            </div>
+            {/* Visa */}
+            <div className="h-7 px-2.5 bg-[#1a1f71] rounded-md flex items-center justify-center">
+              <span className="text-[10px] font-bold text-white">VISA</span>
+            </div>
+            {/* Mastercard */}
+            <div className="h-7 px-2.5 bg-[#f79e1b]/10 border border-[#f79e1b]/30 rounded-md flex items-center justify-center">
+              <span className="text-[10px] font-bold text-[#f79e1b]">Mastercard</span>
+            </div>
+            {/* COD */}
+            <div className="h-7 px-2.5 bg-muted rounded-md flex items-center justify-center">
+              <span className="text-[10px] font-medium text-muted-foreground">Cash on Delivery</span>
+            </div>
+          </div>
+
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-muted-foreground">
             <p>&copy; {currentYear} GotiNova. All rights reserved.</p>
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
