@@ -147,75 +147,97 @@ export default async function HomePage() {
           />
         )}
 
-        {/* Categories with Products — Kikuu Style */}
+        {/* Categories with Products */}
         {categories.length > 0 && (
           <section className="py-6 sm:py-10 lg:py-14">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between mb-5 sm:mb-7">
-                <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold">Shop by Category</h2>
+                <div>
+                  <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold">Shop by Category</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">Browse our collections</p>
+                </div>
                 <Link href="/products" className="text-xs sm:text-sm text-primary font-medium hover:underline flex items-center gap-1">
                   See All
                   <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </Link>
               </div>
 
-              {/* Category sections */}
+              {/* Category rows with products */}
               <div className="space-y-8 sm:space-y-10">
                 {categories.slice(0, 6).map((category) => {
-                  const categoryProducts = products.filter(p => p.categoryId === category.id).slice(0, 8)
-                  if (categoryProducts.length === 0) return null
+                  const categoryProducts = products.filter(p => p.categoryId === category.id).slice(0, 10)
 
                   return (
                     <div key={category.id}>
                       {/* Category header */}
                       <div className="flex items-center justify-between mb-3 sm:mb-4">
-                        <h3 className="text-sm sm:text-lg font-semibold">{category.name}</h3>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-1 h-5 sm:h-6 bg-primary rounded-full" />
+                          <h3 className="text-sm sm:text-lg font-bold text-foreground">{category.name}</h3>
+                          {categoryProducts.length > 0 && (
+                            <span className="text-[10px] sm:text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                              {categoryProducts.length} items
+                            </span>
+                          )}
+                        </div>
                         <Link
                           href={`/products?category=${category.id}`}
-                          className="text-[11px] sm:text-xs text-primary font-medium hover:underline flex items-center gap-1"
+                          className="text-[11px] sm:text-xs text-primary font-medium hover:underline flex items-center gap-1 bg-primary/5 px-2.5 py-1 rounded-lg hover:bg-primary/10 transition-colors"
                         >
                           View All
                           <ArrowRight className="w-3 h-3" />
                         </Link>
                       </div>
 
-                      {/* Horizontal product scroll */}
-                      <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scrollbar-hide">
-                        {categoryProducts.map((product) => (
-                          <Link
-                            key={product.id}
-                            href={`/products/${product.id}`}
-                            className="snap-start flex-shrink-0 w-[140px] sm:w-[170px] group"
-                          >
-                            <div className="aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-muted border border-border/60 mb-2 group-hover:shadow-md transition-shadow">
-                              {product.image ? (
-                                <img
-                                  src={product.image}
-                                  alt={product.name}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                                  No image
-                                </div>
-                              )}
+                      {/* Products row — horizontal scroll on mobile, grid-like on desktop */}
+                      {categoryProducts.length > 0 ? (
+                        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scrollbar-hide">
+                          {categoryProducts.map((product) => (
+                            <div
+                              key={product.id}
+                              className="snap-start flex-shrink-0 w-[150px] sm:w-[180px] lg:w-[200px]"
+                            >
+                              <ProductCard
+                                id={product.id}
+                                name={product.name}
+                                price={product.price}
+                                originalPrice={product.originalPrice}
+                                image={product.image}
+                                rating={product.rating}
+                                reviewCount={product.reviewCount}
+                                description={product.description}
+                                stock={product.stock}
+                              />
                             </div>
-                            <p className="text-xs sm:text-sm font-medium line-clamp-2 leading-tight mb-0.5 group-hover:text-primary transition-colors">
-                              {product.name}
-                            </p>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-xs sm:text-sm font-bold text-primary">
-                                GH₵ {parseFloat(product.price).toFixed(0)}
-                              </span>
-                              {product.originalPrice && (
-                                <span className="text-[10px] sm:text-xs text-muted-foreground line-through">
-                                  GH₵ {parseFloat(product.originalPrice).toFixed(0)}
-                                </span>
-                              )}
+                          ))}
+
+                          {/* "See more" card at end */}
+                          <Link
+                            href={`/products?category=${category.id}`}
+                            className="snap-start flex-shrink-0 w-[150px] sm:w-[180px] lg:w-[200px] flex items-center justify-center"
+                          >
+                            <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-primary/20 bg-primary/5 flex flex-col items-center justify-center gap-2 hover:bg-primary/10 hover:border-primary/40 transition-all">
+                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <ArrowRight className="w-5 h-5 text-primary" />
+                              </div>
+                              <span className="text-xs font-medium text-primary">View All</span>
+                              <span className="text-[10px] text-muted-foreground">{category.name}</span>
                             </div>
                           </Link>
-                        ))}
-                      </div>
+                        </div>
+                      ) : (
+                        /* Empty category — show browse card */
+                        <Link
+                          href={`/products?category=${category.id}`}
+                          className="block p-6 sm:p-8 rounded-2xl border border-dashed border-border bg-muted/30 hover:bg-muted/50 transition-colors text-center group"
+                        >
+                          <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Sparkles className="w-6 h-6 text-primary" />
+                          </div>
+                          <p className="text-sm font-medium text-foreground">Browse {category.name}</p>
+                          <p className="text-xs text-muted-foreground mt-1">Products coming soon</p>
+                        </Link>
+                      )}
                     </div>
                   )
                 })}
