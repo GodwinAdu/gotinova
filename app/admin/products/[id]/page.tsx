@@ -50,6 +50,9 @@ export default function EditProductPage() {
   const [isActive, setIsActive] = useState(true)
   const [images, setImages] = useState<UploadedImage[]>([])
   const [variants, setVariants] = useState<Variant[]>([])
+  const [attributes, setAttributes] = useState<Array<{ name: string; value: string }>>([])
+  const [newAttrName, setNewAttrName] = useState('')
+  const [newAttrValue, setNewAttrValue] = useState('')
 
   useEffect(() => {
     loadProduct()
@@ -88,6 +91,11 @@ export default function EditProductPage() {
         setStock(product.stock?.toString() || '')
         setSku(product.sku || '')
         setIsActive(product.isActive !== false)
+
+        // Load attributes
+        if (product.attributes && product.attributes.length > 0) {
+          setAttributes(product.attributes.map((a: any) => ({ name: a.name, value: a.value })))
+        }
 
         // Load all images — main image + additional images from JSON field
         const loadedImages: UploadedImage[] = []
@@ -152,9 +160,12 @@ export default function EditProductPage() {
           sku: v.sku,
         })))
       } else {
-        // Clear variants if none
         await saveProductVariants(productId, [])
       }
+
+      // Save attributes
+      const { saveProductAttributes } = await import('@/app/actions/attributes')
+      await saveProductAttributes(productId, attributes)
 
       if (result.success) {
         setSuccess('Product updated successfully!')
@@ -309,6 +320,100 @@ export default function EditProductPage() {
                 maxFiles={5}
                 maxSize={16 * 1024 * 1024}
               />
+            </Card>
+
+            {/* Attributes */}
+            <Card className="p-5 rounded-2xl space-y-4">
+              <div>
+                <h2 className="text-base font-semibold">Attributes / Specs</h2>
+                <p className="text-[11px] text-muted-foreground">Product details shown to customers (e.g. Material, Weight, Brand)</p>
+              </div>
+
+              {attributes.length > 0 && (
+                <div className="space-y-2">
+                  {attributes.map((attr, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Input
+                        value={attr.name}
+                        onChange={(e) => {
+                          const updated = [...attributes]
+                          updated[idx] = { ...updated[idx], name: e.target.value }
+                          setAttributes(updated)
+                        }}
+                        placeholder="Name"
+                        className="flex-1 h-8 text-xs"
+                      />
+                      <Input
+                        value={attr.value}
+                        onChange={(e) => {
+                          const updated = [...attributes]
+                          updated[idx] = { ...updated[idx], value: e.target.value }
+                          setAttributes(updated)
+                        }}
+                        placeholder="Value"
+                        className="flex-1 h-8 text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setAttributes(attributes.filter((_, i) => i !== idx))}
+                        className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Input
+                  value={newAttrName}
+                  onChange={(e) => setNewAttrName(e.target.value)}
+                  placeholder="Attribute name"
+                  className="flex-1 h-8 text-xs"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      if (newAttrName.trim() && newAttrValue.trim()) {
+                        setAttributes([...attributes, { name: newAttrName.trim(), value: newAttrValue.trim() }])
+                        setNewAttrName('')
+                        setNewAttrValue('')
+                      }
+                    }
+                  }}
+                />
+                <Input
+                  value={newAttrValue}
+                  onChange={(e) => setNewAttrValue(e.target.value)}
+                  placeholder="Value"
+                  className="flex-1 h-8 text-xs"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      if (newAttrName.trim() && newAttrValue.trim()) {
+                        setAttributes([...attributes, { name: newAttrName.trim(), value: newAttrValue.trim() }])
+                        setNewAttrName('')
+                        setNewAttrValue('')
+                      }
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (newAttrName.trim() && newAttrValue.trim()) {
+                      setAttributes([...attributes, { name: newAttrName.trim(), value: newAttrValue.trim() }])
+                      setNewAttrName('')
+                      setNewAttrValue('')
+                    }
+                  }}
+                  className="h-8 px-3 rounded-lg"
+                >
+                  <Plus className="w-3 h-3" />
+                </Button>
+              </div>
             </Card>
 
             {/* Variants */}
