@@ -58,7 +58,7 @@ export interface StoreSettings {
 
 const DEFAULT_SETTINGS: StoreSettings = {
   storeName: 'GotiNova',
-  storeEmail: 'achaempomaatina352@gmail.com',
+  storeEmail: 'gotinova@gmail.com',
   storePhone: '+233 24 959 5624',
   whatsappNumber: '233249595624',
   storeAddress: 'Kumasi, Ghana',

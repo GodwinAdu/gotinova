@@ -105,7 +105,7 @@ export default async function AboutPage() {
               Have questions? We&apos;d love to hear from you
             </p>
             <div className="space-y-2">
-              <p className="text-muted-foreground">Email: achaempomaatina352@gmail.com</p>
+              <p className="text-muted-foreground">Email: gotinova@gmail.com</p>
               <p className="text-muted-foreground">Phone: +233 24 959 5624</p>
               <p className="text-muted-foreground">Location: Kumasi, Ghana</p>
             </div>

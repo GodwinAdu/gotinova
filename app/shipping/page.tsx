@@ -240,7 +240,7 @@ export default async function ShippingPage() {
                 <div className="bg-muted/50 border rounded-lg p-4">
                   <p className="font-semibold text-foreground mb-2">Coming Soon</p>
                   <p>
-                    International shipping is not currently available. We are actively working on expanding our delivery network to serve customers outside Ghana. If you are interested in international orders, please contact us at achaempomaatina352@gmail.com and we will notify you as soon as this service becomes available.
+                    International shipping is not currently available. We are actively working on expanding our delivery network to serve customers outside Ghana. If you are interested in international orders, please contact us at gotinova@gmail.com and we will notify you as soon as this service becomes available.
                   </p>
                 </div>
               </div>
@@ -255,7 +255,7 @@ export default async function ShippingPage() {
                 </p>
                 <div className="bg-card border rounded-lg p-4 space-y-2">
                   <p><strong>GotiNova Customer Support</strong></p>
-                  <p>Email: achaempomaatina352@gmail.com</p>
+                  <p>Email: gotinova@gmail.com</p>
                   <p>Phone/WhatsApp: +233 24 959 5624</p>
                   <p>Location: Kumasi, Ghana</p>
                   <p className="text-sm mt-2">Support hours: Monday–Saturday, 8:00 AM – 6:00 PM (GMT)</p>

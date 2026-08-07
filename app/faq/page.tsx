@@ -38,7 +38,7 @@ const faqs = [
   },
   {
     question: 'Can I cancel my order?',
-    answer: 'Orders can be cancelled before they are shipped. Once shipped, you will need to wait for delivery and then initiate a return. Contact achaempomaatina352@gmail.com for cancellation requests.',
+    answer: 'Orders can be cancelled before they are shipped. Once shipped, you will need to wait for delivery and then initiate a return. Contact gotinova@gmail.com for cancellation requests.',
   },
 ]
 
@@ -74,7 +74,7 @@ export default async function FAQPage() {
               <p className="text-muted-foreground mb-4">
                 Can&apos;t find what you&apos;re looking for? Contact our support team.
               </p>
-              <p className="text-primary font-medium">achaempomaatina352@gmail.com</p>
+              <p className="text-primary font-medium">gotinova@gmail.com</p>
             </div>
           </div>
         </section>

@@ -90,7 +90,7 @@ export default async function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold">Email</h3>
-                      <p className="text-muted-foreground">achaempomaatina352@gmail.com</p>
+                      <p className="text-muted-foreground">gotinova@gmail.com</p>
                     </div>
                   </div>
 

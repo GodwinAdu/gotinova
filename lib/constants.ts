@@ -11,7 +11,7 @@ export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000
 // Format: country code + number without + or spaces (e.g. 233249595624)
 export const STORE_WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '233249595624'
 export const STORE_PHONE = '+233 24 959 5624'
-export const STORE_EMAIL = 'achaempomaatina352@gmail.com'
+export const STORE_EMAIL = 'gotinova@gmail.com'
 
 // Pagination
 export const ITEMS_PER_PAGE = 12

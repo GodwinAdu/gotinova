@@ -79,7 +79,7 @@ function baseTemplate(content: string): string {
   </div>
   <div style="text-align:center;padding:24px 0;border-top:1px solid #e5e7eb;font-size:12px;color:#9ca3af;">
     <p style="margin:0;">Thank you for shopping with ${STORE_NAME}</p>
-    <p style="margin:8px 0 0;">Kumasi, Ghana • achaempomaatina352@gmail.com</p>
+    <p style="margin:8px 0 0;">Kumasi, Ghana • gotinova@gmail.com</p>
   </div>
 </div>
 </body>

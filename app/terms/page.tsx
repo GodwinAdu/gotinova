@@ -258,7 +258,7 @@ export default async function TermsPage() {
                 <div className="bg-card border rounded-lg p-4 space-y-2">
                   <p><strong>GotiNova</strong></p>
                   <p>Kumasi, Ghana</p>
-                  <p>Email: achaempomaatina352@gmail.com</p>
+                  <p>Email: gotinova@gmail.com</p>
                   <p>Phone/WhatsApp: +233 24 959 5624</p>
                 </div>
               </div>
