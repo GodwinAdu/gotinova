@@ -1,4 +1,4 @@
--- Add product variants table
+   -- Add product variants table
 -- Run this migration to support product variants (size, color, etc.)
 
 CREATE TABLE IF NOT EXISTS "productVariants" (

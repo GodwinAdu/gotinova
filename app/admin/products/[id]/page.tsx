@@ -88,9 +88,24 @@ export default function EditProductPage() {
         setStock(product.stock?.toString() || '')
         setSku(product.sku || '')
         setIsActive(product.isActive !== false)
+
+        // Load all images — main image + additional images from JSON field
+        const loadedImages: UploadedImage[] = []
         if (product.image) {
-          setImages([{ id: 'existing-1', url: product.image, name: 'Current image' }])
+          loadedImages.push({ id: 'main', url: product.image, name: 'Main image' })
         }
+        if (product.images) {
+          try {
+            const additionalImages = JSON.parse(product.images) as string[]
+            additionalImages.forEach((url, idx) => {
+              // Avoid duplicating the main image
+              if (url !== product.image) {
+                loadedImages.push({ id: `extra-${idx}`, url, name: `Image ${idx + 2}` })
+              }
+            })
+          } catch {}
+        }
+        setImages(loadedImages)
       }
     } catch (err) {
       setError('Failed to load product')
@@ -112,6 +127,7 @@ export default function EditProductPage() {
     setSaving(true)
     try {
       const mainImage = images.length > 0 ? images[0].url : undefined
+      const allImagesJson = images.length > 1 ? JSON.stringify(images.map(i => i.url)) : null
 
       const result = await updateProduct(productId, {
         name,
@@ -123,6 +139,7 @@ export default function EditProductPage() {
         sku: sku || null,
         isActive,
         image: mainImage || null,
+        images: allImagesJson,
       })
 
       // Save variants
